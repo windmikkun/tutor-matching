@@ -34,7 +34,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::apiResource('teachers', TeacherController::class)->except(['create', 'edit']);
-    Route::apiResource('employers', EmployerController::class)->except(['create', 'edit']);
+    Route::get('/employers/me', [EmployerController::class, 'me']);
+    Route::middleware('auth:sanctum')->apiResource('employers', EmployerController::class)->except(['create', 'edit']);
     Route::apiResource('corporate-jobs', CorporateJobController::class)->except(['create', 'edit']);
     Route::apiResource('individual-jobs', IndividualJobController::class)->except(['create', 'edit']);
     Route::apiResource('surveys', SurveyController::class)->except(['create', 'edit']);

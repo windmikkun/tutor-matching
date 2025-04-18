@@ -53,12 +53,8 @@ class AuthController extends Controller
             ]);
         }
 
-        // トークン作成
-        $token = $user->createToken('auth_token')->plainTextToken;
-
+        // セッションベース認証のみ（SPA用）
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
             'user' => $user
         ]);
     }
@@ -75,7 +71,7 @@ class AuthController extends Controller
         }
 
         // 認証
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (!Auth::guard('web')->attempt($request->only('email', 'password'))) {
             return response()->json([
                 'message' => 'メールアドレスまたはパスワードが正しくありません'
             ], 401);
@@ -92,12 +88,8 @@ class AuthController extends Controller
         $user->last_login = now();
         $user->save();
 
-        // トークン作成
-        $token = $user->createToken('auth_token')->plainTextToken;
-
+        // セッションベース認証のみ（SPA用）
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
             'user' => $user
         ]);
     }
@@ -118,16 +110,16 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        $user = $request->user();
-
-        // ユーザータイプに応じてプロフィール情報をロード
-        if ($user->user_type === 'teacher') {
-            $user->load('teacher');
-        } else {
-            $user->load('employer');
-        }
-
-        return response()->json($user);
+        $userFromRequest = $request->user();
+        $userFromAuth = \Auth::guard('web')->user();
+        return response()->json([
+            'user_from_request' => $userFromRequest,
+            'user_from_request_id' => $userFromRequest ? $userFromRequest->id : null,
+            'user_from_auth' => $userFromAuth,
+            'user_from_auth_id' => $userFromAuth ? $userFromAuth->id : null,
+            'session_id' => session()->getId(),
+            'all_session' => session()->all(),
+        ]);
     }
 
     public function logout(Request $request)

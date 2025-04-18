@@ -14,6 +14,20 @@ Route::get('/auth-api', function () {
     return view('auth_api');
 });
 
+Route::get('/employer-api', function () {
+    return view('employer_api');
+});
+
+// 本番用 雇用者プロフィール登録画面
+Route::get('/employer-api-prod', function () {
+    return view('employer_api_prod');
+});
+
+// 応急処置: /loginルートを追加してAPI未認証時の500エラーを防止
+Route::get('/login', function () {
+    return response()->json(['message' => 'Please authenticate.'], 401);
+})->name('login');
+
 Route::get('/apitest', function () {
     return view('apitest');
 });

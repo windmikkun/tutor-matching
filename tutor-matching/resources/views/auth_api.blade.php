@@ -29,12 +29,12 @@
                     <option value="corporate_employer">corporate_employer</option>
                 </select>
             </label>
-            <div id="teacherFields">
+            <div id="nameFields">
                 <label>姓: <input type="text" name="first_name"></label>
                 <label>名: <input type="text" name="last_name"></label>
             </div>
-            <div id="employerFields" style="display:none;">
-                <label>名前: <input type="text" name="name"></label>
+            <div id="companyFields" style="display:none;">
+                <label>会社名: <input type="text" name="name"></label>
             </div>
             <button type="submit">登録</button>
         </form>
@@ -74,8 +74,9 @@
     // ユーザー種別によるフォーム切り替え
     document.getElementById('userType').addEventListener('change', function() {
         const type = this.value;
-        document.getElementById('teacherFields').style.display = (type === 'teacher') ? '' : 'none';
-        document.getElementById('employerFields').style.display = (type !== 'teacher') ? '' : 'none';
+        // teacher/individual_employerは姓・名、corporate_employerは会社名
+        document.getElementById('nameFields').style.display = (type === 'teacher' || type === 'individual_employer') ? '' : 'none';
+        document.getElementById('companyFields').style.display = (type === 'corporate_employer') ? '' : 'none';
     });
 
     // アクセストークン保存用
@@ -86,6 +87,10 @@
         e.preventDefault();
         const form = e.target;
         const data = Object.fromEntries(new FormData(form));
+        // individual_employer時はnameにfirst_name+last_nameを連結してセット
+        if (data.user_type === 'individual_employer') {
+            data.name = (data.first_name || '') + (data.last_name || '');
+        }
         document.getElementById('registerResult').textContent = '登録中...';
         try {
             const res = await fetch('/api/register', {
