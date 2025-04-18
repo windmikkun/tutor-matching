@@ -9,7 +9,7 @@ class Teacher extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'teacher_id';
+    // 主キーはデフォルト(id)を利用
 
     protected $fillable = [
         'user_id',
@@ -28,16 +28,16 @@ class Teacher extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function scoutRequests()
     {
-        return $this->hasMany(ScoutRequest::class, 'teacher_id', 'teacher_id');
+        return $this->hasMany(ScoutRequest::class, 'teacher_id', 'id');
     }
 
     public function individualContracts()
     {
-        return $this->hasMany(IndividualContract::class, 'teacher_id', 'teacher_id');
+        return $this->hasMany(IndividualContract::class, 'teacher_id', 'id');
     }
 }

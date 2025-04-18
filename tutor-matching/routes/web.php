@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::get('/apitest', function () {
+    return view('apitest');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes

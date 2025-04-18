@@ -19,16 +19,16 @@ class IndividualContract extends Model
 
     public function teacher()
     {
-        return $this->belongsTo(Teacher::class, 'teacher_id', 'teacher_id');
+        return $this->belongsTo(Teacher::class, 'teacher_id', 'id');
     }
 
     public function employer()
     {
-        return $this->belongsTo(Employer::class, 'employer_id', 'employer_id');
+        return $this->belongsTo(Employer::class, 'employer_id', 'id');
     }
 
     public function individualJob()
     {
-        return $this->belongsTo(IndividualJob::class, 'job_id', 'job_id');
+        return $this->belongsTo(IndividualJob::class, 'job_id', 'id');
     }
 }

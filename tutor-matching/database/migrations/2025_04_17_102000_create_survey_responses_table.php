@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('survey_responses', function (Blueprint $table) {
-            $table->id('response_id');
-            $table->unsignedInteger('survey_id');
-$table->foreign('survey_id')->references('survey_id')->on('surveys');
-            $table->unsignedInteger('user_id');
-$table->foreign('user_id')->references('user_id')->on('users');
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('survey_id');
+$table->foreign('survey_id')->references('id')->on('surveys');
+            $table->unsignedBigInteger('user_id');
+$table->foreign('user_id')->references('id')->on('users');
             $table->text('answer');
             $table->timestamp('submitted_at')->useCurrent();
             $table->timestamps();

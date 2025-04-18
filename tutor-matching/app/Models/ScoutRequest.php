@@ -21,11 +21,11 @@ class ScoutRequest extends Model
 
     public function employer()
     {
-        return $this->belongsTo(Employer::class, 'employer_id', 'employer_id');
+        return $this->belongsTo(Employer::class, 'employer_id', 'id');
     }
 
     public function teacher()
     {
-        return $this->belongsTo(Teacher::class, 'teacher_id', 'teacher_id');
+        return $this->belongsTo(Teacher::class, 'teacher_id', 'id');
     }
 }

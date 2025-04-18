@@ -24,9 +24,11 @@ use App\Http\Controllers\API\IndividualContractController;
 |
 */
 
+// 認証不要のエンドポイント（ログインしなくても見れる）
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+// 認証必須のエンドポイント（ログインしてないと見れない）
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);

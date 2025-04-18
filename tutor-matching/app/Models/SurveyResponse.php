@@ -20,11 +20,11 @@ class SurveyResponse extends Model
 
     public function survey()
     {
-        return $this->belongsTo(Survey::class, 'survey_id', 'survey_id');
+        return $this->belongsTo(Survey::class, 'survey_id', 'id');
     }
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

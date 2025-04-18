@@ -9,7 +9,7 @@ class Employer extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'employer_id';
+    // 主キーはデフォルト(id)を利用
 
     protected $fillable = [
         'user_id',
@@ -22,26 +22,26 @@ class Employer extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function corporateJobs()
     {
-        return $this->hasMany(CorporateJob::class, 'employer_id', 'employer_id');
+        return $this->hasMany(CorporateJob::class, 'employer_id', 'id');
     }
 
     public function individualJobs()
     {
-        return $this->hasMany(IndividualJob::class, 'employer_id', 'employer_id');
+        return $this->hasMany(IndividualJob::class, 'employer_id', 'id');
     }
 
     public function scoutRequests()
     {
-        return $this->hasMany(ScoutRequest::class, 'employer_id', 'employer_id');
+        return $this->hasMany(ScoutRequest::class, 'employer_id', 'id');
     }
 
     public function individualContracts()
     {
-        return $this->hasMany(IndividualContract::class, 'employer_id', 'employer_id');
+        return $this->hasMany(IndividualContract::class, 'employer_id', 'id');
     }
 }

@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('scout_requests', function (Blueprint $table) {
-            $table->id('request_id');
-            $table->unsignedInteger('employer_id');
-$table->foreign('employer_id')->references('employer_id')->on('employers')->onDelete('cascade');
-            $table->unsignedInteger('teacher_id');
-$table->foreign('teacher_id')->references('teacher_id')->on('teachers');
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('employer_id');
+$table->foreign('employer_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('teacher_id');
+$table->foreign('teacher_id')->references('id')->on('teachers');
             $table->string('message', 1000)->nullable();
             $table->enum('status', ['pending', 'accepted', 'rejected'])->default('pending');
             $table->timestamp('expires_at')->nullable();
