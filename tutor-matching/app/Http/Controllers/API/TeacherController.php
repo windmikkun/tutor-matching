@@ -13,7 +13,11 @@ class TeacherController extends Controller
      */
     public function index()
     {
-        //
+        // すべての先生（Teacher）データを取得
+        $teachers = Teacher::all();
+
+        // 取得したデータをJSON形式で返す
+        return response()->json($teachers);
     }
 
     /**
@@ -21,7 +25,18 @@ class TeacherController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // 1. 入力内容のバリデーション（チェック）
+        $validated = $request->validate([
+            'user_id'    => 'required|exists:users,id',
+            'first_name' => 'required|string|max:50',
+            'last_name'  => 'required|string|max:50',
+        ]);
+
+        // 2. Teacherモデルを使って新しい先生データを作成
+        $teacher = Teacher::create($validated);
+
+        // 3. 作成したデータをJSON形式で返す（201: Created）
+        return response()->json($teacher, 201);
     }
 
     /**
@@ -29,7 +44,8 @@ class TeacherController extends Controller
      */
     public function show(Teacher $teacher)
     {
-        //
+        //指定された先生（Teacher)の情報をJSON形式で返す
+        return response()->json($teacher);
     }
 
     /**
@@ -37,7 +53,17 @@ class TeacherController extends Controller
      */
     public function update(Request $request, Teacher $teacher)
     {
-        //
+        //1.入力内容のバリデーション
+        $validated = $request->validate([
+            'first_name' => 'sometimes|required|string|max;50',
+            'last_name' => 'sometimes|required|string|max:50'
+        ]);
+
+        //2.　データを更新
+        $teacher->update($validated);
+
+        //3. 更新後のデータをJSON形式で返す
+        return response()->json($teacher);
     }
 
     /**
@@ -45,6 +71,10 @@ class TeacherController extends Controller
      */
     public function destroy(Teacher $teacher)
     {
-        //
+        //指定された先生データを削除
+        $teacher->delete();
+
+        //削除成功のメッセージを返す
+        return response()->json(['message' => '削除しました'], 200);
     }
 }
