@@ -11,13 +11,32 @@ class TeacherController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // すべての先生（Teacher）データを取得
-        $teachers = Teacher::all();
-
-        // 取得したデータをJSON形式で返す
-        return response()->json($teachers);
+    $user = $request->user();
+    // employer系ユーザーのみ許可
+    if (!in_array($user->user_type, ['individual_employer', 'corporate_employer'])) {
+        return response()->json(['message' => '講師リストは雇用者のみ閲覧可能です'], 403);
+    }
+    // 講師一覧を返す（idをteacher_idとして返す）
+    $teachers = \App\Models\Teacher::all()->map(function($teacher) {
+        return [
+            'teacher_id' => $teacher->id,
+            'first_name' => $teacher->first_name,
+            'last_name' => $teacher->last_name,
+            'profile_image' => $teacher->profile_image,
+            'phone' => $teacher->phone,
+            'address' => $teacher->address,
+            'university' => $teacher->university,
+            'faculty' => $teacher->faculty,
+            'graduation_year' => $teacher->graduation_year,
+            'teaching_experience' => $teacher->teaching_experience,
+            'subject' => $teacher->subject,
+            'grade_level' => $teacher->grade_level,
+            // 必要に応じて他のカラムも追加
+        ];
+    });
+    return response()->json($teachers);
     }
 
     /**
@@ -27,7 +46,6 @@ class TeacherController extends Controller
     {
         // 1. 入力内容のバリデーション（チェック）
         $validated = $request->validate([
-            'user_id'    => 'required|exists:users,id',
             'first_name' => 'required|string|max:50',
             'last_name'  => 'required|string|max:50',
         ]);
@@ -59,11 +77,20 @@ class TeacherController extends Controller
             'last_name' => 'sometimes|required|string|max:50'
         ]);
 
-        //2.　データを更新
-        $teacher->update($validated);
+        //2.ログインユーザーのID取得
+        $user_id = $request->user()->id;
 
-        //3. 更新後のデータをJSON形式で返す
-        return response()->json($teacher);
+        //3. 既にプロフィールが存在する場合  409
+        //  user_id一つに対して一つのプロフにするため
+        if(Teacher::where('user_id', $user_id->exists())){
+            return response()->json(['message' => '既に教師プロフィールが存在します。'], 409);
+        }
+
+        //4.新しい講師データを作成(user_id自動セット)
+        $teacher = Teacher::create(array_merge($validated, ['user_id' => $user_id]));
+        
+        //5.jsonで返す
+        return response()->json($teacher, 201);
     }
 
     /**

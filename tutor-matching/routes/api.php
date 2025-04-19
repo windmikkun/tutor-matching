@@ -5,8 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\TeacherController;
 use App\Http\Controllers\API\EmployerController;
-use App\Http\Controllers\API\CorporateJobController;
-use App\Http\Controllers\API\IndividualJobController;
+
 use App\Http\Controllers\API\SurveyController;
 use App\Http\Controllers\API\SurveyResponseController;
 use App\Http\Controllers\API\ScoutRequestController;
@@ -36,8 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('teachers', TeacherController::class)->except(['create', 'edit']);
     Route::get('/employers/me', [EmployerController::class, 'me']);
     Route::middleware('auth:sanctum')->apiResource('employers', EmployerController::class)->except(['create', 'edit']);
-    Route::apiResource('corporate-jobs', CorporateJobController::class)->except(['create', 'edit']);
-    Route::apiResource('individual-jobs', IndividualJobController::class)->except(['create', 'edit']);
+
     Route::apiResource('surveys', SurveyController::class)->except(['create', 'edit']);
     Route::apiResource('survey-responses', SurveyResponseController::class)->except(['create', 'edit']);
     Route::apiResource('scout-requests', ScoutRequestController::class)->except(['create', 'edit']);

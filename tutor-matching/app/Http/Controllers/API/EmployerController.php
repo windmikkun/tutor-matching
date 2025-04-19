@@ -11,10 +11,27 @@ class EmployerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // 雇用者一覧を返す
-        $employers = Employer::all();
+        $user = $request->user();
+
+    // teacherユーザーのみ許可
+    if ($user->user_type !== 'teacher') {
+        return response()->json(['message' => '求人リストは講師のみ閲覧可能です'], 403);
+    }
+
+        // 雇用者一覧を返す（idをemployer_idとして返す）
+        $employers = Employer::all()->map(function($employer) {
+            return [
+                'employer_id' => $employer->id,
+                'name' => $employer->name,
+                'contact_person' => $employer->contact_person,
+                'phone' => $employer->phone,
+                'address' => $employer->address,
+                'description' => $employer->description,
+                // 必要に応じて他のカラムも追加
+            ];
+        });
         return response()->json($employers);
     }
 

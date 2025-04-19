@@ -59,6 +59,48 @@
         <pre id="userResult" class="info" style="padding-right:4em;"></pre>
     </div>
 
+    <h1>講師リスト取得APIテスト</h1>
+    <button id="teacherListBtn">講師リスト取得</button>
+    <div class="response-container" style="position:relative;">
+        <button type="button" class="copy-btn" style="position:absolute;top:4px;right:8px;z-index:2;font-size:0.8em;">コピー</button>
+        <pre id="teacherListResult" class="info" style="padding-right:4em;"></pre>
+    </div>
+
+    <h1>求人リスト取得APIテスト</h1>
+    <button id="employerListBtn">求人リスト取得</button>
+    <div class="response-container" style="position:relative;">
+        <button type="button" class="copy-btn" style="position:absolute;top:4px;right:8px;z-index:2;font-size:0.8em;">コピー</button>
+        <pre id="employerListResult" class="info" style="padding-right:4em;"></pre>
+    </div>
+
+    <h1>ブックマーク一覧取得APIテスト</h1>
+    <button id="bookmarkListBtn">ブックマーク一覧取得</button>
+    <div class="response-container" style="position:relative;">
+        <button type="button" class="copy-btn" style="position:absolute;top:4px;right:8px;z-index:2;font-size:0.8em;">コピー</button>
+        <pre id="bookmarkListResult" class="info" style="padding-right:4em;"></pre>
+    </div>
+
+    <h1>ブックマーク登録APIテスト</h1>
+    <form id="bookmarkCreateForm">
+        <input type="number" name="teacher_id" placeholder="teacher_id (講師をブックマークする場合のみ)" min="1"><br>
+        <input type="number" name="employer_id" placeholder="employer_id (雇用者をブックマークする場合のみ)" min="1"><br>
+        <button type="submit">ブックマーク登録</button>
+    </form>
+    <div class="response-container" style="position:relative;">
+        <button type="button" class="copy-btn" style="position:absolute;top:4px;right:8px;z-index:2;font-size:0.8em;">コピー</button>
+        <pre id="bookmarkCreateResult" class="info" style="padding-right:4em;"></pre>
+    </div>
+
+    <h1>ブックマーク削除APIテスト</h1>
+    <form id="bookmarkDeleteForm">
+        <input type="number" name="bookmark_id" placeholder="削除するbookmark_id" min="1" required><br>
+        <button type="submit">ブックマーク削除</button>
+    </form>
+    <div class="response-container" style="position:relative;">
+        <button type="button" class="copy-btn" style="position:absolute;top:4px;right:8px;z-index:2;font-size:0.8em;">コピー</button>
+        <pre id="bookmarkDeleteResult" class="info" style="padding-right:4em;"></pre>
+    </div>
+
     <h1>ログアウトAPIテスト</h1>
     <button id="logoutBtn">ログアウト</button>
     <div class="response-container" style="position:relative;">
@@ -80,7 +122,7 @@
             });
         });
     });
-    let accessToken = '';
+    
     // ユーザータイプによる入力欄切替
     document.getElementById('userTypeSelect').addEventListener('change', function() {
         const type = this.value;
@@ -91,23 +133,30 @@
     document.getElementById('registerForm').onsubmit = async function(e) {
         e.preventDefault();
         const form = e.target;
+        const userTypeValue = form.user_type.value;
+        console.log('選択された user_type:', userTypeValue);
         const data = {
             email: form.email.value,
             password: form.password.value,
             password_confirmation: form.password_confirmation.value,
-            user_type: form.user_type.value,
+            user_type: userTypeValue,
         };
+
         if (form.user_type.value === 'teacher') {
             data.first_name = form.first_name.value;
             data.last_name = form.last_name.value;
             data.subject = form.subject.value;
             data.grade_level = form.grade_level.value;
+        }
+        if (userTypeValue === 'individual_employer' || userTypeValue === 'corporate_employer') {
+            data.name = form.name.value;
         } else if (form.user_type.value === 'individual_employer' || form.user_type.value === 'corporate_employer') {
             data.name = form.name.value;
         }
         const res = await fetch('/api/register', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify(data)
         });
         const text = await res.text();
@@ -116,7 +165,6 @@
         try {
             const json = JSON.parse(text);
             pre.textContent = JSON.stringify(json, null, 2);
-            if (json.access_token) accessToken = json.access_token;
         } catch { pre.textContent = text; }
     };
 
@@ -131,6 +179,7 @@
         const res = await fetch('/api/login', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify(data)
         });
         const text = await res.text();
@@ -139,19 +188,14 @@
         try {
             const json = JSON.parse(text);
             pre.textContent = JSON.stringify(json, null, 2);
-            if (json.access_token) accessToken = json.access_token;
         } catch { pre.textContent = text; }
     };
     // ユーザー情報取得
     document.getElementById('userBtn').onclick = async function() {
         const pre = document.getElementById('userResult');
-        if (!accessToken) {
-            pre.textContent = '先にログインまたは登録してください';
-            pre.className = 'error';
-            return;
-        }
         const res = await fetch('/api/me', {
-            headers: { 'Authorization': 'Bearer ' + accessToken }
+            method: 'GET',
+            credentials: 'include'
         });
         const text = await res.text();
         pre.className = res.ok ? 'success' : 'error';
@@ -160,17 +204,101 @@
             pre.textContent = JSON.stringify(json, null, 2);
         } catch { pre.textContent = text; }
     };
+
+    // 講師リスト取得
+    document.getElementById('teacherListBtn').onclick = async function() {
+        const pre = document.getElementById('teacherListResult');
+        const res = await fetch('/api/teachers', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        const text = await res.text();
+        pre.className = res.ok ? 'success' : 'error';
+        try {
+            const json = JSON.parse(text);
+            pre.textContent = JSON.stringify(json, null, 2);
+        } catch { pre.textContent = text; }
+    };
+
+    // 求人リスト取得
+    document.getElementById('employerListBtn').onclick = async function() {
+        const pre = document.getElementById('employerListResult');
+        const res = await fetch('/api/employers', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        const text = await res.text();
+        pre.className = res.ok ? 'success' : 'error';
+        try {
+            const json = JSON.parse(text);
+            pre.textContent = JSON.stringify(json, null, 2);
+        } catch { pre.textContent = text; }
+    };
+
+    // ブックマーク一覧取得
+    document.getElementById('bookmarkListBtn').onclick = async function() {
+        const pre = document.getElementById('bookmarkListResult');
+        const res = await fetch('/api/bookmarks', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        const text = await res.text();
+        pre.className = res.ok ? 'success' : 'error';
+        try {
+            const json = JSON.parse(text);
+            pre.textContent = JSON.stringify(json, null, 2);
+        } catch { pre.textContent = text; }
+    };
+
+    // ブックマーク削除
+    document.getElementById('bookmarkDeleteForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const id = form.bookmark_id.value;
+        if (!id) return;
+        const res = await fetch(`/api/bookmarks/${id}`, {
+            method: 'DELETE',
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include'
+        });
+        const text = await res.text();
+        const pre = document.getElementById('bookmarkDeleteResult');
+        pre.className = res.ok ? 'success' : 'error';
+        try {
+            const json = JSON.parse(text);
+            pre.textContent = JSON.stringify(json, null, 2);
+        } catch { pre.textContent = text; }
+    };
+
+    // ブックマーク登録
+    document.getElementById('bookmarkCreateForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const data = {};
+        if (form.teacher_id.value) data.teacher_id = Number(form.teacher_id.value);
+        if (form.employer_id.value) data.employer_id = Number(form.employer_id.value);
+
+        const res = await fetch('/api/bookmarks', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
+            body: JSON.stringify(data)
+        });
+        const text = await res.text();
+        const pre = document.getElementById('bookmarkCreateResult');
+        pre.className = res.ok ? 'success' : 'error';
+        try {
+            const json = JSON.parse(text);
+            pre.textContent = JSON.stringify(json, null, 2);
+        } catch { pre.textContent = text; }
+    };
+
     // ログアウト
     document.getElementById('logoutBtn').onclick = async function() {
         const pre = document.getElementById('logoutResult');
-        if (!accessToken) {
-            pre.textContent = '先にログインまたは登録してください';
-            pre.className = 'error';
-            return;
-        }
         const res = await fetch('/api/logout', {
             method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + accessToken }
+            credentials: 'include'
         });
         const text = await res.text();
         pre.className = res.ok ? 'success' : 'error';
@@ -178,8 +306,8 @@
             const json = JSON.parse(text);
             pre.textContent = JSON.stringify(json, null, 2);
         } catch { pre.textContent = text; }
-        accessToken = '';
     };
+
     </script>
 </body>
 </html>

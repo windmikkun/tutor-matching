@@ -9,7 +9,7 @@ class Bookmark extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'bookmark_id';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
         'user_id',
