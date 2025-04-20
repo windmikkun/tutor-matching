@@ -235,7 +235,7 @@
         } catch { pre.textContent = text; }
     };
 
-    // ブックマーク一覧取得
+    // ブックマーク一覧取得（テーブル形式で表示）
     document.getElementById('bookmarkListBtn').onclick = async function() {
         const pre = document.getElementById('bookmarkListResult');
         const res = await fetch('/api/bookmarks', {
@@ -246,9 +246,22 @@
         pre.className = res.ok ? 'success' : 'error';
         try {
             const json = JSON.parse(text);
-            pre.textContent = JSON.stringify(json, null, 2);
+            if (Array.isArray(json) && json.length > 0) {
+                let html = '<table border="1" style="border-collapse:collapse; margin-bottom:0.5em;">';
+                html += '<tr><th>bookmark_id</th><th>bookmarkable_type</th><th>bookmarkable_id</th><th>その他</th></tr>';
+                for (const b of json) {
+                    html += `<tr><td>${b.bookmark_id ?? b.id ?? ''}</td><td>${b.bookmarkable_type ?? ''}</td><td>${b.bookmarkable_id ?? ''}</td><td><details><summary>詳細</summary><pre style='background:none;border:none;margin:0;padding:0;'>${JSON.stringify(b, null, 2)}</pre></details></td></tr>`;
+                }
+                html += '</table>';
+                pre.innerHTML = html;
+            } else if (Array.isArray(json) && json.length === 0) {
+                pre.textContent = 'ブックマークはありません';
+            } else {
+                pre.textContent = JSON.stringify(json, null, 2);
+            }
         } catch { pre.textContent = text; }
     };
+
 
     // ブックマーク削除
     document.getElementById('bookmarkDeleteForm').onsubmit = async function(e) {
