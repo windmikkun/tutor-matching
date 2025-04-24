@@ -18,6 +18,7 @@ class Teacher extends Model
         'profile_image',
         'phone',
         'address',
+        'nearest_station',
         'university',
         'faculty',
         'graduation_year',

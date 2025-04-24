@@ -201,10 +201,89 @@
 
 ---
 
-## その他API（サーベイ・スカウト・契約等）
+## スカウト（ScoutRequest）API
 
-- `/api/surveys` などもRESTfulな設計（index, store, show, update, destroy）
-- 詳細仕様は各コントローラ・モデルの定義を参照
+### 概要
+- 雇用者（employer）が講師（teacher）にスカウトを送信・管理する機能
+- RESTful設計（index, store, show, update, destroy）
+- 認証必須（auth:sanctum）
+
+### エンドポイント一覧
+
+#### スカウト一覧取得（employer/teacherで内容が異なる）
+- **GET** `/api/scout-requests`
+- employer: 自分が送信したスカウト一覧
+- teacher: 自分が受信したスカウト一覧
+- **レスポンス例**:
+```json
+[
+  {
+    "id": 1,
+    "employer_id": 2,
+    "teacher_id": 5,
+    "message": "スカウト内容",
+    "status": "pending",
+    "expires_at": null,
+    "created_at": "2025-04-20T13:00:00Z",
+    "updated_at": "2025-04-20T13:00:00Z"
+  }
+]
+```
+
+#### スカウト新規作成
+- **POST** `/api/scout-requests`
+- employerユーザーのみ利用可
+- **リクエスト例**:
+```json
+{
+  "teacher_id": 5,
+  "message": "スカウト内容"
+}
+```
+- **レスポンス例**:
+```json
+{
+  "id": 1,
+  "employer_id": 2,
+  "teacher_id": 5,
+  "message": "スカウト内容",
+  "status": "pending",
+  "created_at": "2025-04-20T13:00:00Z",
+  "updated_at": "2025-04-20T13:00:00Z"
+}
+```
+
+#### スカウト詳細取得
+- **GET** `/api/scout-requests/{scout_request_id}`
+- employerまたはteacher（関係者）のみ取得可
+
+#### スカウト更新
+- **PUT/PATCH** `/api/scout-requests/{scout_request_id}`
+- employer（送信者）のみ可
+- **リクエスト例**:
+```json
+{
+  "message": "内容を修正",
+  "status": "accepted"
+}
+```
+
+#### スカウト削除
+- **DELETE** `/api/scout-requests/{scout_request_id}`
+- employer（送信者）のみ可
+
+### バリデーション・権限
+- `teacher_id` は存在するteacherのID必須
+- `message` は1～1000文字（任意）
+- `status` は `pending`/`accepted`/`rejected` のいずれか
+- employer/teacher以外はアクセス不可
+
+### 外部キー設計
+- `employer_id` → employers.id
+- `teacher_id` → teachers.id
+
+### エラー例
+- 権限エラー、バリデーションエラーは共通仕様参照
 
 ---
 

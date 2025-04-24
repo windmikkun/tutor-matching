@@ -9,7 +9,7 @@ class ScoutRequest extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'request_id';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
         'employer_id',

@@ -11,6 +11,14 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
+    // ユーザー種別判定メソッド
+    public function isTeacher() {
+        return $this->user_type === 'teacher';
+    }
+    public function isEmployer() {
+        return $this->user_type === 'employer';
+    }
+
 
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -21,6 +29,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'last_name',
         'email',
         'password',
         'user_type',

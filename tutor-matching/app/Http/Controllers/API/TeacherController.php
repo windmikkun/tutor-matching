@@ -19,7 +19,7 @@ class TeacherController extends Controller
         return response()->json(['message' => '講師リストは雇用者のみ閲覧可能です'], 403);
     }
     // 講師一覧を返す（idをteacher_idとして返す）
-    $teachers = \App\Models\Teacher::all()->map(function($teacher) {
+    $teachers = \App\Models\Teacher::with('user')->get()->map(function($teacher) {
         return [
             'teacher_id' => $teacher->id,
             'first_name' => $teacher->first_name,
@@ -33,7 +33,13 @@ class TeacherController extends Controller
             'teaching_experience' => $teacher->teaching_experience,
             'subject' => $teacher->subject,
             'grade_level' => $teacher->grade_level,
-            // 必要に応じて他のカラムも追加
+            // user情報もネストして返す
+            'user' => $teacher->user ? [
+                'id' => $teacher->user->id,
+                'email' => $teacher->user->email,
+                'user_type' => $teacher->user->user_type,
+                'name' => $teacher->user->name,
+            ] : null,
         ];
     });
     return response()->json($teachers);

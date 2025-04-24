@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('scout_requests', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('employer_id');
-$table->foreign('employer_id')->references('id')->on('users')->onDelete('cascade');
+$table->foreign('employer_id')->references('id')->on('employers')->onDelete('cascade');
             $table->unsignedBigInteger('teacher_id');
 $table->foreign('teacher_id')->references('id')->on('teachers');
             $table->string('message', 1000)->nullable();

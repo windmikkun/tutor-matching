@@ -26,6 +26,7 @@ return new class extends Migration
             $table->integer('teaching_experience')->default(0);
             $table->string('subject', 50);
             $table->string('grade_level', 50);
+            $table->text('bio')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });

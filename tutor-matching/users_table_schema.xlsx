@@ -1,0 +1,17 @@
+| カラム名           | 型                  | 備考                         |
+|--------------------|---------------------|------------------------------|
+| id                 | bigIncrements       | 主キー                       |
+| email              | string(255)         | ユニーク                      |
+| password           | string(255)         |                              |
+| user_type          | enum                | 'teacher', 'individual_employer', 'corporate_employer' |
+| status             | enum                | 'active', 'inactive', 'pending' デフォルト'pending' |
+| email_verified_at  | timestamp           | nullable                     |
+| last_login         | timestamp           | nullable                     |
+| created_at         | timestamp           | useCurrent                   |
+| updated_at         | timestamp           | useCurrent, useCurrentOnUpdate|
+| avatar             | string(255)         | デフォルト'users/default.png' |
+| messenger_color    | string(20)          | デフォルト'#2180f3'           |
+| dark_mode          | boolean             | デフォルトfalse               |
+| active_status      | enum                | 'online','offline' デフォルト'offline' |
+| name               | string(255)         | nullable                     |
+| last_name          | string(255)         | nullable（モデルで追加済み）  |
