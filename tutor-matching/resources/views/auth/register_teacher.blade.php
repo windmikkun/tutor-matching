@@ -7,7 +7,7 @@
                 <h2 class="fw-bold mb-0" style="font-size:2rem;">講師として新規登録</h2>
             </div>
             <div class="custom-form-center">
-<form method="POST" action="#">
+<form method="POST" action="{{ route('register') }}">
     <style>
       .custom-form-group {
         display: flex;
@@ -62,6 +62,7 @@
       }
     </style>
     @csrf
+    <input type="hidden" name="user_type" value="teacher">
     <div class="custom-form-group">
       <label for="last_name" class="custom-form-label">姓</label>
       <input type="text" class="custom-form-input" id="last_name" name="last_name" required autofocus placeholder="例）山田">

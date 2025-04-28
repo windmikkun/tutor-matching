@@ -97,7 +97,7 @@
               <a href="{{ route('dashboard') }}" class="footer-menu-btn @if(Route::currentRouteName() == 'dashboard') active @endif" aria-label="ダッシュボード">
                 <span class="footer-menu-icon"><i class="bi bi-house-door"></i></span>
               </a>
-              <a href="{{ route('chat') }}" class="footer-menu-btn @if(Route::currentRouteName() == 'chat') active @endif" aria-label="チャット">
+              <a href="/chatify" class="footer-menu-btn @if(Request::is('chatify')) active @endif" aria-label="チャット">
                 <span class="footer-menu-icon"><i class="bi bi-chat-dots"></i></span>
               </a>
               @php($user = Auth::user())
@@ -106,12 +106,14 @@
                   <i class="bi bi-list-ul" style="font-size:1.6rem;"></i>
                 </a>
               @elseif($user && isset($user->employer) && $user->employer)
-                <a href="{{ url('/list') }}" class="footer-menu-btn @if(Request::is('list')) active @endif" aria-label="リスト">
+                <a href="{{ route('teacher.list') }}" class="footer-menu-btn @if(Route::currentRouteName() == 'teacher.list') active @endif" aria-label="講師リスト">
                   <i class="bi bi-list-ul" style="font-size:1.6rem;"></i>
                 </a>
               @endif
             </nav>
             @endif
         </div>
+    <script src="/js/image_upload.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     </body>
 </html>

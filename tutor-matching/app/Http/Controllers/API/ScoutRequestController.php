@@ -13,7 +13,7 @@ class ScoutRequestController extends Controller
      */
     /**
      * スカウト一覧取得API
-     * - employer（individual_employer/corporate_employer）は「自分が送信したスカウト一覧」を取得
+     * - employer（employer）は「自分が送信したスカウト一覧」を取得
      * - teacherは「自分が受け取ったスカウト一覧」を取得
      * - それ以外のユーザーは権限エラー
      */
@@ -22,7 +22,7 @@ class ScoutRequestController extends Controller
         $user = $request->user();
 
         // ▼ employer（雇用者）ユーザーの場合: 自分が送信したスカウト一覧
-        if (in_array($user->user_type, ['corporate_employer', 'individual_employer'])) {
+        if (in_array($user->user_type, ['employer'])) {
             // 雇用者プロファイル取得
             $employerId = $user->employer->id ?? null;
             if (!$employerId) {
@@ -69,7 +69,7 @@ class ScoutRequestController extends Controller
         $user = $request->user();
 
         //雇用者ではない場合拒否
-        if (!in_array($user->user_type, ['corporate_employer', 'individual_employer'])) {
+        if (!in_array($user->user_type, ['employer'])) {
             return response()->json([
                 'message' => '権限がありません',
                 'error' => 'unauthorized'

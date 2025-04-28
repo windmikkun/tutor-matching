@@ -30,7 +30,14 @@
         </div>
         <nav>
             <a href="{{ route('dashboard') }}" class="mx-2">ダッシュボード</a>
-            <a href="{{ route('profile.edit') }}" class="mx-2">プロフィール</a>
+            @php
+    $userType = Auth::user()->user_type ?? '';
+@endphp
+@if ($userType === 'teacher')
+    <a href="{{ route('teacher.profile.edit') }}" class="mx-2">プロフィール</a>
+@elseif ($userType === 'corporate_employer' || $userType === 'employer')
+    <a href="{{ route('employer.profile.edit') }}" class="mx-2">プロフィール</a>
+@endif
             <a href="/chatify" class="mx-2">メッセージ</a>
         </nav>
         <div>
@@ -105,6 +112,7 @@
                             <td>
                                 <a href="{{ route('teacher.scout.reply', $scout->id) }}" class="btn btn-sm btn-primary">返信</a>
                                 <a href="{{ route('teacher.scout.show', $scout->id) }}" class="btn btn-sm btn-outline-secondary">詳細</a>
+                                <a href="/scouts" class="btn btn-sm btn-info ms-2">スカウト一覧を見る</a>
                             </td>
                         </tr>
                     @empty
@@ -117,39 +125,6 @@
         </div>
     </div>
 
-    {{-- 最新のチャット5件 --}}
-    <div class="card mb-4">
-        <div class="card-header">最新のチャット</div>
-        <div class="card-body p-0">
-            @if(count($latestMessages))
-                <table class="table mb-0">
-                    <thead>
-                        <tr>
-                            <th>相手</th>
-                            <th>内容</th>
-                            <th>送信時刻</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($latestMessages as $message)
-                            @php
-                                $isMine = $message->from_id === auth()->id();
-                                $partnerId = $isMine ? $message->to_id : $message->from_id;
-                                $partner = \App\Models\User::find($partnerId);
-                            @endphp
-                            <tr>
-                                <td>{{ $partner ? $partner->name : '不明' }}</td>
-                                <td>{{ Str::limit($message->body, 40) }}</td>
-                                <td>{{ $message->created_at->format('Y-m-d H:i') }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @else
-                <p class="text-muted m-3">最近のチャットはありません。</p>
-            @endif
-        </div>
-    </div>
 
 </div>
 

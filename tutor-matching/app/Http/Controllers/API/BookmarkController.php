@@ -35,13 +35,13 @@ class BookmarkController extends Controller
                 $validated = $request->validate([
                     'employer_id' => 'required|exists:employers,id',
                 ]);
-                $bookmarkable_type = 'Employer';
+                $bookmarkable_type = 'employer'; // 小文字に統一
                 $bookmarkable_id = $validated['employer_id'];
             } elseif (in_array($user->user_type, ['individual_employer', 'corporate_employer'])) {
                 $validated = $request->validate([
                     'teacher_id' => 'required|exists:teachers,id',
                 ]);
-                $bookmarkable_type = 'Teacher';
+                $bookmarkable_type = 'teacher'; // 小文字に統一
                 $bookmarkable_id = $validated['teacher_id'];
             } else {
                 return response()->json([
@@ -70,7 +70,21 @@ class BookmarkController extends Controller
                 'bookmarkable_id' => $bookmarkable_id,
             ]);
 
-            return response()->json($bookmark, 201);
+            // 最新のブックマーク数を取得
+            if ($bookmarkable_type === 'employer') {
+                $model = \App\Models\Employer::find($bookmarkable_id);
+                $bookmarkCount = $model ? $model->bookmarkedByTeachers()->count() : 0;
+            } elseif ($bookmarkable_type === 'teacher') {
+                $model = \App\Models\Teacher::find($bookmarkable_id);
+                $bookmarkCount = $model ? $model->bookmarkedByEmployers()->count() : 0;
+            } else {
+                $bookmarkCount = 0;
+            }
+
+            return response()->json([
+                'bookmarked' => true,
+                'bookmarkCount' => $bookmarkCount
+            ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'message' => 'バリデーションエラー',
@@ -96,8 +110,26 @@ class BookmarkController extends Controller
                     'error' => 'forbidden',
                 ], 403);
             }
+            // 削除後の最新ブックマーク数を取得
+            $bookmarkable_type = $bookmark->bookmarkable_type;
+            $bookmarkable_id = $bookmark->bookmarkable_id;
             $bookmark->delete();
-            return response()->json(['message' => 'ブックマークを削除しました']);
+
+            if ($bookmarkable_type === 'Employer') {
+                $model = \App\Models\Employer::find($bookmarkable_id);
+                $bookmarkCount = $model ? $model->bookmarkedByTeachers()->count() : 0;
+            } elseif ($bookmarkable_type === 'Teacher') {
+                $model = \App\Models\Teacher::find($bookmarkable_id);
+                $bookmarkCount = $model ? $model->bookmarkedByEmployers()->count() : 0;
+            } else {
+                $bookmarkCount = 0;
+            }
+
+            return response()->json([
+                'bookmarked' => false,
+                'bookmarkCount' => $bookmarkCount,
+                'message' => 'ブックマークを削除しました'
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => '予期しないエラーが発生しました',

@@ -19,7 +19,7 @@ class ScoutRequestApiTest extends TestCase
     public function test_employer_can_get_own_scout_requests()
     {
         // 雇用者ユーザー・プロフィール作成
-        $employerUser = User::factory()->create(['user_type' => 'individual_employer']);
+        $employerUser = User::factory()->create(['user_type' => 'employer']);
         $employer = Employer::factory()->create(['user_id' => $employerUser->id]);
 
         // 講師ユーザー・プロフィール作成
@@ -44,7 +44,7 @@ class ScoutRequestApiTest extends TestCase
      */
     public function test_teacher_can_get_received_scout_requests()
     {
-        $employerUser = User::factory()->create(['user_type' => 'individual_employer']);
+        $employerUser = User::factory()->create(['user_type' => 'employer']);
         $employer = Employer::factory()->create(['user_id' => $employerUser->id]);
         $teacherUser = User::factory()->create(['user_type' => 'teacher']);
         $teacher = Teacher::factory()->create(['user_id' => $teacherUser->id]);

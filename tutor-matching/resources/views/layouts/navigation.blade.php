@@ -6,9 +6,17 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ Auth::check() ? route('dashboard') : route('/') }}" class="flex items-center" style="text-decoration:none;">
-                        <img src="{{ asset('images/logo.png') }}" alt="CowTeacherロゴ" style="height:36px;width:auto;" class="me-2" />
-                        <span class="text-xl font-bold text-gray-800 align-middle" style="letter-spacing:0.05em;">{{ config('app.name', 'サービス名') }}</span>
+                        <img src="{{ asset('images/logo.png') }}" alt="CowTeacherロゴ" style="height:80px;width:auto;" class="me-2" />
+                        <span class="fw-bold fs-4 d-none d-sm-inline" style="color:#222; letter-spacing:0.02em;">{{ config('app.name', 'サービス名') }}</span>
                     </a>
+                    <style>
+                    @media (max-width: 600px) {
+                        .navbar .fs-4,
+                        .fs-4.d-none.d-sm-inline {
+                            display: none !important;
+                        }
+                    }
+                    </style>
                 </div>
 
                 <!-- Central Page Title -->
@@ -31,7 +39,14 @@
       $userType = Auth::user()->user_type ?? '';
     @endphp
     <div>
-      @if(!empty($lastName))
+      @php
+        $firstName = Auth::user()->first_name ?? '';
+        $lastName = Auth::user()->last_name ?? '';
+        $userType = Auth::user()->user_type ?? '';
+      @endphp
+      @if(!empty($firstName))
+        {{ $firstName }}
+      @elseif(!empty($lastName))
         {{ $lastName }}
       @elseif(!empty($userType))
         {{ $userType }}
@@ -40,9 +55,7 @@
 @endif
 
                             <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
+                                
                             </div>
                         </button>
                     </x-slot>

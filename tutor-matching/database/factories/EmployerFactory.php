@@ -12,7 +12,8 @@ class EmployerFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->company(),
+            'first_name' => $this->faker->company(),
+            'last_name' => '',
             'contact_person' => $this->faker->name(),
             'phone' => $this->faker->phoneNumber(),
             'address' => $this->faker->address(),

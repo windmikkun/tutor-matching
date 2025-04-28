@@ -11,6 +11,18 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
+    // 自分がブックマークした求人や講師
+    public function bookmarks()
+    {
+        return $this->hasMany(\App\Models\Bookmark::class, 'user_id', 'id');
+    }
+
+    // 雇用者にブックマークされている
+    public function bookmarkedByEmployers()
+    {
+        return $this->morphMany(\App\Models\Bookmark::class, 'bookmarkable');
+    }
+
     // ユーザー種別判定メソッド
     public function isTeacher() {
         return $this->user_type === 'teacher';
@@ -28,11 +40,13 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
         'last_name',
         'email',
         'password',
         'user_type',
+        'phone',
+        'postal_code',
     ];
 
     /**

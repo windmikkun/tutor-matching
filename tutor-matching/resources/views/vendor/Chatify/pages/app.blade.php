@@ -56,15 +56,35 @@
                 {{-- header back button, avatar and user name --}}
                 <div class="chatify-d-flex chatify-justify-content-between chatify-align-items-center">
                     <a href="#" class="show-listView"><i class="fas fa-arrow-left"></i></a>
-                    <div class="avatar av-s header-avatar" style="margin: 0px 10px; margin-top: -5px; margin-bottom: -5px;">
-                    </div>
-                    <a href="#" class="user-name">{{ config('chatify.name') }}</a>
+                    
+                    @php
+    $displayName = Auth::user()->name;
+    if (isset(Auth::user()->user_type) && Auth::user()->user_type === 'employer') {
+        $employer = \App\Models\Employer::where('user_id', Auth::user()->id)->first();
+        if ($employer && !empty($employer->name)) {
+            $displayName = $employer->name;
+        } else {
+            $displayName = Auth::user()->last_name;
+        }
+    }
+@endphp
+@php
+    $displayName = Auth::user()->name;
+    if (isset(Auth::user()->user_type) && Auth::user()->user_type === 'employer') {
+        $employer = \App\Models\Employer::where('user_id', Auth::user()->id)->first();
+        if ($employer && !empty($employer->name)) {
+            $displayName = $employer->name;
+        } else {
+            $displayName = Auth::user()->last_name;
+        }
+    }
+@endphp
+<a href="#" class="user-name">{{ $displayName }}</a>
                 </div>
                 {{-- header buttons --}}
                 <nav class="m-header-right">
                     <a href="#" class="add-to-favorite"><i class="fas fa-star"></i></a>
                     <a href="/"><i class="fas fa-home"></i></a>
-                    <a href="#" class="show-infoSide"><i class="fas fa-info-circle"></i></a>
                 </nav>
             </nav>
             {{-- Internet connection --}}
@@ -96,15 +116,6 @@
         </div>
         {{-- Send Message Form --}}
         @include('Chatify::layouts.sendForm')
-    </div>
-    {{-- ---------------------- Info side ---------------------- --}}
-    <div class="messenger-infoView app-scroll">
-        {{-- nav actions --}}
-        <nav>
-            <p>User Details</p>
-            <a href="#"><i class="fas fa-times"></i></a>
-        </nav>
-        {!! view('Chatify::layouts.info')->render() !!}
     </div>
 </div>
 

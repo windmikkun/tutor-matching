@@ -2,6 +2,26 @@
 @section('page_title', '講師ダッシュボード')
 @section('content')
 <style>
+.dashboard-list-card-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s;
+}
+.dashboard-list-card-link:hover {
+  background: #f2f4f8;
+  cursor: pointer;
+  color: #007bff;
+}
+.dashboard-list-card-link .list-btn {
+  color: #888;
+  transition: color 0.15s;
+}
+.dashboard-list-card-link:hover .list-btn {
+  color: #007bff;
+}
 .dashboard-box {
   border: none;
   border-radius: 8px;
@@ -122,9 +142,10 @@
   <div class="dashboard-double-box">
     <ul class="dashboard-menu-list w-100">
       <li><a href="{{ route('teacher.profile.edit') }}" class="dashboard-menu-link">プロフィール編集</a></li>
-      <li><a href="{{ route('teacher.profile.edit') }}" class="dashboard-menu-link">会員情報編集</a></li>
+      <li><a href="{{ route('teacher.account.edit') }}" class="dashboard-menu-link">会員情報編集</a></li>
       <li><a href="{{ route('chat') }}" class="dashboard-menu-link">チャット画面</a></li>
       <li><a href="{{ url('/scouts') }}" class="dashboard-menu-link">スカウト一覧</a></li>
+      <li><a href="{{ url('/entries') }}" class="dashboard-menu-link">応募済一覧</a></li>
       <li><a href="{{ url('/bookmarks') }}" class="dashboard-menu-link">ブックマーク一覧</a></li>
     </ul>
   </div>
@@ -133,31 +154,28 @@
     <div class="dashboard-status-divider"></div>
     <div style="display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center;">
       <div style="display:flex; align-items:center; gap:8px; font-size:1.1rem;">
-        <span style="min-width:48px; text-align:center;">新着</span>
-        <span style="font-weight:bold; font-size:1.3rem; min-width:32px; text-align:center;">{{ $scoutCounts['new'] ?? 0 }}</span>
+        <span style="min-width:64px; text-align:center;">未対応</span>
+        <span style="font-weight:bold; font-size:1.3rem; min-width:32px; text-align:center;">
+            {{ ($scoutCounts['new'] ?? 0) + ($scoutCounts['pending'] ?? 0) }}
+        </span>
         <span style="min-width:24px; text-align:center;">件</span>
-      </div>
-      <div style="display:flex; align-items:center; gap:8px; font-size:1.1rem;">
-        <span style="min-width:48px; text-align:center;">検討中</span>
-        <span style="font-weight:bold; font-size:1.3rem; min-width:32px; text-align:center;">{{ $scoutCounts['pending'] ?? 0 }}</span>
-        <span style="min-width:24px; text-align:center;">件</span>
-      </div>
-      <div style="display:flex; align-items:center; gap:8px; font-size:1.1rem;">
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; font-size:1.1rem;">
         <span style="min-width:48px; text-align:center;">成立</span>
         <span style="font-weight:bold; font-size:1.3rem; min-width:32px; text-align:center;">{{ $scoutCounts['matched'] ?? 0 }}</span>
         <span style="min-width:24px; text-align:center;">件</span>
-      </div>
+    </div>
     </div>
   </div>
 </div>
 <div class="dashboard-box mt-4" style="max-width:700px; margin:24px auto 0 auto; width:100%;">
   <div class="dashboard-section-title">スカウト一覧</div>
   @if(isset($scouts) && count($scouts) > 0)
-    @foreach($scouts->take(5) as $scout)
-      <div class="dashboard-list-card">
-        <span class="list-title">{{ $scout->employer_name ?? $scout->teacher_name ?? 'スカウト' }}</span>
-        <a href="{{ route('scout.show', $scout->id) }}" class="list-btn"><i class="bi bi-play-fill"></i></a>
-      </div>
+    @foreach($scouts as $scout)
+      <a href="{{ route('employer.show', $scout->employer_id) }}" class="dashboard-list-card dashboard-list-card-link">
+        <span class="list-title">{{ $scout->employer_name }}</span>
+        <span class="list-btn"><i class="bi bi-play-fill"></i></span>
+      </a>
     @endforeach
   @else
     <div class="text-muted">現在届いているスカウトはありません</div>
@@ -167,37 +185,17 @@
   <div class="dashboard-section-title">チャット</div>
   @if(isset($latestMessages) && count($latestMessages) > 0)
     @foreach($latestMessages as $chat)
-      <div class="dashboard-list-card">
+      <a href="{{ route('chat.show', $chat->from_id == Auth::id() ? $chat->to_id : $chat->from_id) }}" class="dashboard-list-card dashboard-list-card-link">
         <span class="list-title">
-          {{ $chat->from_id == Auth::id() ? ($chat->toUser->full_name ?? '相手') : ($chat->fromUser->full_name ?? '相手') }}
+          {{ $chat->target_full_name ?? '相手' }}
         </span>
-        <a href="{{ route('chat.show', $chat->from_id == Auth::id() ? $chat->to_id : $chat->from_id) }}" class="list-btn"><i class="bi bi-play-fill"></i></a>
-      </div>
+        <span class="list-btn"><i class="bi bi-play-fill"></i></span>
+      </a>
     @endforeach
   @else
     <div class="text-muted">現在チャットはありません</div>
   @endif
 </div>
-</div>
-
-  {{-- チャット --}}
-  <div class="border rounded p-3 px-4 bg-white" style="max-width:700px; margin:24px auto 0 auto; width:100%;">
-    <div class="fw-bold mb-3">チャット</div>
-    @if(isset($latestMessages) && count($latestMessages) > 0)
-      @foreach($latestMessages as $chat)
-        <div class="d-flex align-items-center border rounded mb-3 px-3 py-2 bg-light" style="min-height:56px;">
-          <span class="me-auto fw-semibold">
-            {{ $chat->from_id == Auth::id() ? ($chat->toUser->full_name ?? '相手') : ($chat->fromUser->full_name ?? '相手') }}
-          </span>
-          <a href="{{ route('chat.show', $chat->from_id == Auth::id() ? $chat->to_id : $chat->from_id) }}" class="btn btn-outline-secondary btn-sm rounded-circle ms-2" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
-            <i class="bi bi-play-fill fs-4"></i>
-          </a>
-        </div>
-      @endforeach
-    @else
-      <div class="text-muted">現在チャットはありません</div>
-    @endif
-  </div>
 </div>
 
 @if(session('scout_sent'))

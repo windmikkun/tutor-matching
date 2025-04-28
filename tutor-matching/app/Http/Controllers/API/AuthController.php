@@ -18,7 +18,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'user_type' => 'required|in:teacher,individual_employer,corporate_employer',
+            'user_type' => 'required|in:teacher,employer',
             // ユーザータイプに応じた追加バリデーション
             'first_name' => 'required_if:user_type,teacher|string|max:50',
             'last_name' => 'required_if:user_type,teacher|string|max:50',

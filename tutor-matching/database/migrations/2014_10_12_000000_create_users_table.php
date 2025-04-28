@@ -14,7 +14,7 @@ class CreateUsersTable extends Migration
             $table->bigIncrements('id');
             $table->string('email', 255)->unique();
             $table->string('password', 255);
-            $table->enum('user_type', ['teacher', 'individual_employer', 'corporate_employer']);
+            $table->string('user_type', 50);
             $table->enum('status', ['active', 'inactive', 'pending'])->default('pending');
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('last_login')->nullable();

@@ -4,10 +4,11 @@
     <div class="card shadow bg-white mx-auto" style="width:100%; max-width:600px; border-radius:1.5rem; overflow:hidden; margin-top:40px; margin-bottom:40px;">
         <div class="card-body p-5">
             <div class="mb-5 text-center">
-                <h2 class="fw-bold mb-0" style="font-size:2rem;">求人者用サインアップ</h2>
+                <h2 class="fw-bold mb-0" style="font-size:2rem;">求人者として新規登録</h2>
             </div>
             <div class="custom-form-center">
-<form method="POST" action="#">
+<form method="POST" action="{{ route('register') }}">
+    @csrf
     <input type="hidden" name="user_type" value="employer">
     <style>
       .custom-form-group {
@@ -63,7 +64,7 @@
       }
     </style>
 
-                @csrf
+
                 <div class="custom-form-group">
   <label for="last_name" class="custom-form-label">姓</label>
   <input type="text" class="custom-form-input" id="last_name" name="last_name" required autofocus placeholder="例）山田">

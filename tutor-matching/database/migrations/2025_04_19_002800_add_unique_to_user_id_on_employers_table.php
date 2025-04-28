@@ -22,6 +22,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('employers', function (Blueprint $table) {
+            // まず外部キー制約を削除
+            $table->dropForeign(['user_id']);
+            // 次にuniqueインデックスを削除
             $table->dropUnique(['user_id']);
         });
     }

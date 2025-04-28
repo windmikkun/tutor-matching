@@ -17,8 +17,15 @@
             'buttons' => [
                 ['label' => '一覧に戻る', 'url' => route('teacher.list')],
                 ['label' => 'スカウトする', 'url' => route('scout.create', ['id' => $teacher->id])]
-            ]
+            ],
+            'bookmarkButton' => view('components.bookmark_button', [
+                'isBookmarked' => $isBookmarked ?? false,
+                'bookmarkCount' => $bookmarkCount ?? 0,
+                'type' => 'teacher',
+                'id' => $teacher->id
+            ])->render()
         ])
     </div>
 </div>
+<script src="/js/bookmark.js"></script>
 @endsection

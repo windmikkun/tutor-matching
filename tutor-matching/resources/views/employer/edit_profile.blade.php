@@ -64,8 +64,8 @@
       }
     </style>
     <div class="custom-form-group">
-      <label for="name" class="custom-form-label">会社名・事業所名</label>
-      <input type="text" class="custom-form-input" id="name" name="name" value="{{ old('name', $employer->name ?? '') }}" required>
+      <label for="first_name" class="custom-form-label">会社名・事業所名</label>
+      <input type="text" class="custom-form-input" id="first_name" name="first_name" value="{{ old('first_name', $employer->first_name ?? '') }}">
     </div>
     <div class="custom-form-group">
       <label for="contact_person" class="custom-form-label">担当者名</label>
@@ -86,6 +86,53 @@
     <div class="custom-form-group">
       <label for="profile_image" class="custom-form-label">プロフィール画像</label>
       <input type="file" class="custom-form-input" id="profile_image" name="profile_image">
+      <progress class="upload-progress" value="0" max="100" style="width:100%;margin-top:10px;"></progress>
+      @php
+        use Illuminate\Support\Facades\Storage;
+        $profileImageUrl = null;
+        if ($employer && $employer->profile_image && Storage::disk('public')->exists($employer->profile_image)) {
+            $profileImageUrl = Storage::url($employer->profile_image);
+        }
+      @endphp
+      <img class="profile-image-preview" src="{{ $profileImageUrl ?? asset('images/default.png') }}" alt="プレビュー" style="max-width:200px;max-height:200px;display:block;margin-top:10px;">
+    </div>
+    <hr style="margin:2rem 0;">
+    <div class="custom-form-group">
+      <label class="custom-form-label">指導形態</label>
+      <select class="custom-form-input" name="lesson_type">
+        <option value="" disabled selected>選択してください</option>
+        <option value="個別" {{ old('lesson_type', $employer->lesson_type ?? '') == '個別' ? 'selected' : '' }}>個別指導</option>
+        <option value="集団" {{ old('lesson_type', $employer->lesson_type ?? '') == '集団' ? 'selected' : '' }}>集団指導</option>
+      </select>
+    </div>
+    <div class="custom-form-group">
+      <label for="student_count" class="custom-form-label">生徒数</label>
+      <input type="number" class="custom-form-input" id="student_count" name="student_count" value="{{ old('student_count', $employer->student_count ?? '') }}" min="0">
+    </div>
+    <div class="custom-form-group">
+      <label for="student_demographics" class="custom-form-label">生徒層</label>
+      <input type="text" class="custom-form-input" id="student_demographics" name="student_demographics" value="{{ old('student_demographics', $employer->student_demographics ?? '') }}">
+    </div>
+    <div class="custom-form-group">
+      <label for="hourly_rate" class="custom-form-label">時給（円）</label>
+      <input type="number" class="custom-form-input" id="hourly_rate" name="hourly_rate" value="{{ old('hourly_rate', $employer->hourly_rate ?? '') }}" min="0">
+    </div>
+    <div class="custom-form-group">
+      <label class="custom-form-label">教室・施設等の画像（最大3枚）</label>
+      <input type="file" class="custom-form-input" name="env_img[]" multiple accept="image/*">
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        @if($employer && $employer->env_img)
+          @foreach(json_decode($employer->env_img, true) as $img)
+            @php
+              $imgUrl = null;
+              if ($img && Storage::disk('public')->exists($img)) {
+                $imgUrl = Storage::url($img);
+              }
+            @endphp
+            <img src="{{ $imgUrl ?? asset('images/default.png') }}" style="max-width:120px;max-height:120px;border-radius:8px;">
+          @endforeach
+        @endif
+      </div>
     </div>
     <button type="submit" class="custom-submit-btn">保存</button>
 </form>

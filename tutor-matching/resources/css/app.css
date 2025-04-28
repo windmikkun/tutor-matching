@@ -1,3 +1,93 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* フォームラベル・テキストボックス共通カスタム */
+.form-label, .custom-form-label {
+  display: block;
+  text-align: left;
+  font-weight: 500;
+  margin-bottom: 0.3em;
+  font-size: 1rem;
+}
+.form-control, .custom-form-input {
+  display: block;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #bfc5ce;
+  padding: 0.7em 1em;
+  font-size: 1.07rem;
+  margin-bottom: 0.5em;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+.form-control:focus, .custom-form-input:focus {
+  border-color: #4dabf7;
+  outline: none;
+}
+
+/* フォーム下部の余白専用 */
+.form-bottom-space {
+  padding-bottom: 2.2rem;
+  margin-bottom: 2.2rem;
+}
+
+/* 最初の入力項目の上に余白 */
+.form-top-space {
+  margin-top: 1.4rem;
+}
+
+/* ラベル（項目名）の上側に余白 */
+.form-label-top-space {
+  margin-top: 2.2rem;
+}
+
+/* 青いボタン（他ページと統一） */
+.btn-blue-box {
+  background: #2563eb;
+  color: #fff !important;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.7em;
+  padding: 0.7em 2.2em;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 6px rgba(37,99,235,0.08);
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+  min-width: 110px;
+  display: inline-block;
+  text-decoration: none;
+}
+.btn-blue-box:hover, .btn-blue-box:focus {
+  background: #1e40af;
+  color: #fff !important;
+  text-decoration: none;
+}
+@media (max-width: 600px) {
+  .btn-blue-box { min-width: 90px; font-size: 0.95rem; }
+}
+
+/* 灰色ボタン（ブックマーク済み用） */
+.btn-gray-box {
+  background: #adb5bd;
+  color: #fff !important;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.7em;
+  padding: 0.7em 2.2em;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 6px rgba(160,160,160,0.08);
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+  min-width: 110px;
+  display: inline-block;
+  text-decoration: none;
+}
+.btn-gray-box:hover, .btn-gray-box:focus {
+  background: #868e96;
+  color: #fff !important;
+  text-decoration: none;
+}
+@media (max-width: 600px) {
+  .btn-gray-box { min-width: 90px; font-size: 0.95rem; }
+}

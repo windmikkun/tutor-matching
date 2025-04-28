@@ -39,7 +39,7 @@
       <header class="mb-auto">
   <div class="d-flex align-items-center justify-content-between w-100">
     <div class="text-start ps-4" style="min-width:220px;">
-      <h3 class="mb-0 fw-bold">CowTeacher</h3>
+      <h3 class="mb-0 fw-bold">FreelanceCowTeacher</h3>
     </div>
     <nav class="nav nav-masthead justify-content-end pe-4">
       @auth
@@ -47,28 +47,13 @@
   $lastName = Auth::user()->last_name ?? '';
   //$userType = Auth::user()->user_type ?? '';
 @endphp
-<div style="position:absolute;top:0;right:0;z-index:999;color:#333;font-size:14px;">
-  @if(!empty($lastName))
-    {{ $lastName }}
-  @elseif(!empty($userType))
-    {{ $userType }}
-  @endif
-</div>
+
 @php
-  $dashboardRoute = null;
+  $dashboardRoute = route('dashboard');
   $dashboardLabel = 'マイページ';
-  if (Auth::user()->user_type === 'teacher') {
-    $dashboardRoute = route('dashboard.teacher');
-  } elseif (in_array(Auth::user()->user_type, ['individual_employer', 'corporate_employer'])) {
-    $dashboardRoute = route('employer.profile.show');
-  }
 @endphp
   @if($dashboardRoute)
     <a class="nav-link fw-bold py-1 px-0" href="{{ $dashboardRoute }}" title="マイページ" style="cursor:pointer;" target="_self">
-      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-speedometer2" viewBox="0 0 16 16">
-        <path d="M8 4a.5.5 0 0 1 .5.5v4.707l2.146 2.147a.5.5 0 0 1-.708.708l-2.25-2.25A.5.5 0 0 1 7.5 9V4.5A.5.5 0 0 1 8 4z"/>
-        <path fill-rule="evenodd" d="M6.664 14.252a7 7 0 1 1 2.672 0l-.37-1.488a6 6 0 1 0-1.932 0l-.37 1.488zM8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14z"/>
-      </svg>
       マイページ
     </a>
   @endif
@@ -80,11 +65,44 @@
   </div>
 </header>
       <main class="px-3 my-auto">
-        <div class="cow-logo" aria-label="牛ロゴ">🐄</div>
+        <img src="{{ asset('images/logo.png') }}" alt="CowTeacherロゴ" class="main-cow-logo" aria-label="牛ロゴ" />
+<style>
+.main-cow-logo {
+  display: block;
+  margin: 0 auto 24px auto;
+  height: 140px;
+  width: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 1.5px 8px rgba(0,0,0,0.07);
+  border-radius: 18px;
+  background: #222222;
+  bacground-opacity: 0.11;
+  animation: cow-float 2.5s ease-in-out infinite alternate;
+}
+@keyframes cow-float {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-16px); }
+}
+</style>
         <h1 class="fw-bold mb-3">FreelanceCowTeacher</h1>
         <p class="lead mb-4">あなたのスキルで、自由に働く。<br>牛のようにのびのびと、教育のフィールドへ。</p>
         <div class="d-grid gap-3 col-8 mx-auto mb-4">
-          <a href="{{ route('register.teacher') }}" class="btn btn-black-invert btn-lg fw-bold">講師として登録</a>
+  @auth
+    @php
+      $user = Auth::user();
+      $listUrl = '';
+      if (method_exists($user, 'isTeacher') && $user->isTeacher()) {
+        $listUrl = url('/jobs');
+      } elseif (method_exists($user, 'isEmployer') && $user->isEmployer()) {
+        $listUrl = url('/teachers');
+      }
+    @endphp
+    @if($listUrl)
+      <a href="{{ $listUrl }}" class="btn btn-black-invert btn-lg fw-bold">リストへ</a>
+    @endif
+  @endauth
+          @guest
+<a href="{{ route('register.teacher') }}" class="btn btn-black-invert btn-lg fw-bold">講師として登録</a>
+@endguest
 <style>
 .btn-black-invert {
   background: #222;
@@ -99,7 +117,9 @@
   text-decoration: none;
 }
 </style>
-          <a href="{{ route('register.employer') }}" class="btn btn-white-invert btn-lg fw-bold">求人者用サインアップ</a>
+          @guest
+<a href="{{ route('register.employer') }}" class="btn btn-white-invert btn-lg fw-bold">講師をお探しの方</a>
+@endguest
 <style>
 .btn-white-invert {
   background: #fff;

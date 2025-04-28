@@ -26,10 +26,21 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('teachers', function (Blueprint $table) {
-            $table->dropColumn('nearest_station');
+            if (Schema::hasColumn('teachers', 'nearest_station')) {
+                $table->dropColumn('nearest_station');
+            }
         });
         Schema::table('employers', function (Blueprint $table) {
-            $table->dropColumn(['nearest_station', 'recruiting_subject']);
+            $drops = [];
+            if (Schema::hasColumn('employers', 'nearest_station')) {
+                $drops[] = 'nearest_station';
+            }
+            if (Schema::hasColumn('employers', 'recruiting_subject')) {
+                $drops[] = 'recruiting_subject';
+            }
+            if (count($drops)) {
+                $table->dropColumn($drops);
+            }
         });
     }
 };

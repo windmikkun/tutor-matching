@@ -42,7 +42,19 @@ class DashboardController extends Controller
             'pending' => $teacher ? $teacher->scoutRequests()->where('status', 'pending')->count() : 0,
             'matched' => $teacher ? $teacher->scoutRequests()->where('status', 'matched')->count() : 0,
         ];
-        $newScouts = [];
+        $scouts = [];
+        if ($teacher) {
+            $scouts = $teacher->scoutRequests()->with(['employer'])->orderByDesc('created_at')->take(5)->get()->map(function($scout) {
+                return (object) [
+                    'id' => $scout->id,
+                    'employer_id' => $scout->employer_id,
+                    'employer_name' => $scout->employer
+    ? trim(($scout->employer->last_name ?? '') . ' ' . ($scout->employer->first_name ?? ''))
+    : '塾',
+                    'status' => $scout->status,
+                ];
+            });
+        }
         // 最新のチャット（部屋単位で最新1件ずつ、最大5名分）
         $userId = $user->id;
         $contactIds = \App\Models\ChMessage::where('from_id', $userId)
@@ -62,10 +74,25 @@ class DashboardController extends Controller
             if ($msg) $latestChats->push($msg);
         }
         $latestChats = $latestChats->sortByDesc('created_at')->take(5);
+
+        // チャット相手がemployerなら塾名をfull_nameとして持たせる
+        $latestChats = $latestChats->map(function($chat) use ($userId) {
+            $targetId = $chat->from_id == $userId ? $chat->to_id : $chat->from_id;
+            $targetUser = \App\Models\User::find($targetId);
+            $fullName = null;
+            if ($targetUser && $targetUser->employer) {
+                $fullName = trim(($targetUser->employer->last_name ?? '') . ' ' . ($targetUser->employer->first_name ?? ''));
+            } elseif ($targetUser) {
+                $fullName = trim(($targetUser->last_name ?? '') . ' ' . ($targetUser->first_name ?? ''));
+            }
+            $chat->target_full_name = $fullName ?: '相手';
+            return $chat;
+        });
+
         return view('dashboard_teacher', [
             'teacher' => $teacher,
             'scoutCounts' => $scoutCounts,
-            'newScouts' => $newScouts,
+            'scouts' => $scouts,
             'latestMessages' => $latestChats,
         ]);
     }
@@ -89,7 +116,12 @@ class DashboardController extends Controller
             'pending' => $employer ? $employer->scoutRequests()->where('status', 'pending')->count() : 0,
             'matched' => $employer ? $employer->scoutRequests()->where('status', 'matched')->count() : 0,
         ];
-        $newScouts = [];
+        // 応募してきた講師リスト（Entryモデルから取得）
+        $entries = \App\Models\Entry::where('employer_id', $employer->id)
+            ->orderByDesc('created_at')
+            ->take(5)
+            ->with('user.teacher')
+            ->get();
         // 最新のチャット（部屋単位で最新1件ずつ、最大5名分）
         $userId = $user->id;
         $contactIds = \App\Models\ChMessage::where('from_id', $userId)
@@ -109,10 +141,25 @@ class DashboardController extends Controller
             if ($msg) $latestChats->push($msg);
         }
         $latestChats = $latestChats->sortByDesc('created_at')->take(5);
+        // チャット相手がteacherなら氏名、employerなら塾名をfull_nameとして持たせる
+        $latestChats = $latestChats->map(function($chat) use ($userId) {
+            $targetId = $chat->from_id == $userId ? $chat->to_id : $chat->from_id;
+            $targetUser = \App\Models\User::find($targetId);
+            $fullName = null;
+            if ($targetUser && $targetUser->teacher) {
+                $fullName = trim(($targetUser->teacher->last_name ?? '') . ' ' . ($targetUser->teacher->first_name ?? ''));
+            } elseif ($targetUser && $targetUser->employer) {
+                $fullName = trim(($targetUser->employer->last_name ?? '') . ' ' . ($targetUser->employer->first_name ?? ''));
+            } elseif ($targetUser) {
+                $fullName = trim(($targetUser->last_name ?? '') . ' ' . ($targetUser->first_name ?? ''));
+            }
+            $chat->target_full_name = $fullName ?: '相手';
+            return $chat;
+        });
         return view('dashboard_employer', [
             'employer' => $employer,
             'scoutCounts' => $scoutCounts,
-            'newScouts' => $newScouts,
+            'entries' => $entries,
             'latestMessages' => $latestChats,
         ]);
     }

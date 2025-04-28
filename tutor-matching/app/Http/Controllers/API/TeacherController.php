@@ -15,7 +15,7 @@ class TeacherController extends Controller
     {
     $user = $request->user();
     // employer系ユーザーのみ許可
-    if (!in_array($user->user_type, ['individual_employer', 'corporate_employer'])) {
+    if (!in_array($user->user_type, ['employer'])) {
         return response()->json(['message' => '講師リストは雇用者のみ閲覧可能です'], 403);
     }
     // 講師一覧を返す（idをteacher_idとして返す）

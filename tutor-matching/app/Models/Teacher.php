@@ -41,4 +41,10 @@ class Teacher extends Model
     {
         return $this->hasMany(IndividualContract::class, 'teacher_id', 'id');
     }
+
+    // 雇用者によってブックマークされている
+    public function bookmarkedByEmployers()
+    {
+        return $this->morphMany(\App\Models\Bookmark::class, 'bookmarkable');
+    }
 }

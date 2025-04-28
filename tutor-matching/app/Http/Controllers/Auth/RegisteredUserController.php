@@ -35,10 +35,12 @@ class RegisteredUserController extends Controller
             'last_name' => ['required', 'string', 'max:50'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'user_type' => ['nullable', 'in:teacher,employer,individual_employer,corporate_employer'],
+            'user_type' => ['nullable', 'in:teacher,employer'],
         ]);
 
         $user = User::create([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'user_type' => $request->input('user_type', 'teacher'),
@@ -60,6 +62,12 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
         Auth::login($user);
+        // ユーザー種別でダッシュボードにリダイレクト
+        if ($user->user_type === 'employer') {
+            return redirect()->route('dashboard.employer');
+        } elseif ($user->user_type === 'teacher') {
+            return redirect()->route('dashboard.teacher');
+        }
         return redirect(RouteServiceProvider::HOME);
     }
 }
