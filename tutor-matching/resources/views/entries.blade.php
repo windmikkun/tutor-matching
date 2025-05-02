@@ -14,8 +14,9 @@
         @endphp
         @include('components.list_card', [
           'fields' => [
-            ['label' => '塾名', 'value' => $job->name ?? '塾名未設定'],
-            ['label' => '住所', 'value' => $job->address ?? '住所未設定'],
+            ['label' => '塾名', 'value' => $job->first_name ?? '塾名未設定'],
+            ['label' => '都道府県', 'value' => optional($job->user)->prefecture ?? '未設定'],
+            ['label' => '市区町村', 'value' => optional($job->user)->address1 ?? '未設定'],
             ['label' => '説明', 'value' => $job->description ?? '説明未設定'],
           ],
           'image' => ($job->profile_image ?? null) ? $job->profile_image : (($job->env_img && count(json_decode($job->env_img, true)) > 0) ? json_decode($job->env_img, true)[0] : asset('images/default.png')),
