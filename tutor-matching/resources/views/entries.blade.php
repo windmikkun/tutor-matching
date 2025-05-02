@@ -18,9 +18,10 @@
             ['label' => '住所', 'value' => $job->address ?? '住所未設定'],
             ['label' => '説明', 'value' => $job->description ?? '説明未設定'],
           ],
-          'image' => ($job->profile_image ?? null) ? $job->profile_image : (($job->env_img && count(json_decode($job->env_img, true)) > 0) ? json_decode($job->env_img, true)[0] : asset('images/default_company.png')),
+          'image' => ($job->profile_image ?? null) ? $job->profile_image : (($job->env_img && count(json_decode($job->env_img, true)) > 0) ? json_decode($job->env_img, true)[0] : asset('images/default.png')),
           'buttons' => [
             ['label' => '詳細', 'url' => route('job.show', ['id' => $job->id])],
+            
             ['label' => '応募済', 'disabled' => true]
           ]
         ])

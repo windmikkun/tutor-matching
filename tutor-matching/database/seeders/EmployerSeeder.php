@@ -56,19 +56,18 @@ class EmployerSeeder extends Seeder
                     'first_name' => $data['first_name'],
                     'last_name' => $data['last_name'],
                     'contact_person' => $data['contact_person'],
-                    'phone' => $data['phone'],
-                    'address' => $data['address'],
-                    'description' => $data['description'],
+                                                            'description' => $data['description'],
+                    'profile_image' => isset($data['profile_image']) ? $data['profile_image'] : 'sample/employer_default.jpg',
+                    'env_img' => isset($data['env_img']) ? json_encode($data['env_img']) : json_encode(['sample/employer_env1.jpg', 'sample/employer_env2.jpg']),
+                    'recruiting_subject' => isset($data['recruiting_subject']) ? $data['recruiting_subject'] : '英語・数学',
                 ]
             );
         }
         // 残りはfakerで
-        \App\Models\User::factory()->count(7)->create()->each(function ($user) {
-            if (!$user->employer) {
-                \App\Models\Employer::factory()->create([
-                    'user_id' => $user->id,
-                ]);
-            }
+        \App\Models\User::factory()->count(7)->create(['user_type' => 'corporate_employer'])->each(function ($user) {
+            \App\Models\Employer::factory()->create([
+                'user_id' => $user->id,
+            ]);
         });
     }
 }

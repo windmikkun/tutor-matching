@@ -1,30 +1,17 @@
 <div class="form-bottom-space" style="margin-top:2.2rem;">
-<form method="{{ $method ?? 'POST' }}" action="{{ $action }}" style="max-width:400px; margin:0 auto;">
+  <div class="card shadow-sm" style="border-radius:1.5rem; background:#fff; max-width:480px; margin:0 auto;">
+    <form method="{{ $method ?? 'POST' }}" action="{{ $action }}" style="max-width:400px; margin:0 auto;" enctype="multipart/form-data">
     @csrf
     @if(isset($method_field))
         @method($method_field)
     @endif
     
-    <div class="mb-3 text-start">
-        <label for="email" class="form-label w-100 form-label-top-space">メールアドレス</label>
-        <input id="email" type="email" name="email" class="form-control w-100 mt-1" style="border-radius:10px;" value="{{ old('email', $user->email ?? '') }}">
-        @error('email')<div class="text-danger small">{{ $message }}</div>@enderror
-    </div>
-    <div class="mb-3 text-start">
-        <label for="postal_code" class="form-label w-100">郵便番号</label>
-        <input id="postal_code" type="text" name="postal_code" class="form-control w-100 mt-1" style="border-radius:10px;" value="{{ old('postal_code', $user->postal_code ?? '') }}">
-        @error('postal_code')<div class="text-danger small">{{ $message }}</div>@enderror
-    </div>
-    <div class="mb-3 text-start">
-        <label for="phone" class="form-label w-100">電話番号</label>
-        <input id="phone" type="text" name="phone" class="form-control w-100 mt-1" style="border-radius:10px;" value="{{ old('phone', $user->phone ?? '') }}">
-        @error('phone')<div class="text-danger small">{{ $message }}</div>@enderror
-    </div>
+
     <div class="mb-3 text-start">
         <label for="profile_image" class="form-label w-100">プロフィール画像</label>
         <input type="file" class="form-control w-100 mt-1" id="profile_image" name="profile_image">
-        <progress class="upload-progress" value="0" max="100" style="width:100%;margin-top:10px;"></progress>
-        <img class="profile-image-preview" src="{{ $teacher && $teacher->profile_image ? asset('storage/'.$teacher->profile_image) : asset('images/default.png') }}" alt="プレビュー" style="max-width:200px;max-height:200px;display:block;margin-top:10px;">
+        <progress id="profile_image_progress" class="upload-progress" value="0" max="100" style="width:100%;margin-top:10px;"></progress>
+        <img id="profile_image_preview" class="profile-image-preview" src="{{ $teacher && $teacher->profile_image ? asset('storage/'.$teacher->profile_image) : asset('images/default.png') }}" alt="プレビュー" style="max-width:200px;max-height:200px;display:block;margin-top:10px;">
     </div>
     <div class="mb-3 text-start">
         <label for="education" class="form-label w-100">学歴</label>
@@ -37,12 +24,17 @@
         @error('current_school')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
     <div class="mb-3 text-start">
-        <label for="trial_lesson" class="form-label w-100">プレ授業欄</label>
-        <textarea id="trial_lesson" name="trial_lesson" class="form-control w-100 mt-1" rows="3">{{ old('trial_lesson', $teacher->trial_lesson ?? '') }}</textarea>
+        <label for="trial_lesson" class="form-label w-100">プレ授業 (Youtube動画URL)</label>
+        <input id="trial_lesson" type="url" name="trial_lesson" class="form-control w-100 mt-1" value="{{ old('trial_lesson', $teacher->trial_lesson ?? '') }}" placeholder="https://www.youtube.com/watch?v=xxxxxxx">
         @error('trial_lesson')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
     <div class="mb-3 text-start">
-        <label for="estimated_hourly_rate" class="form-label w-100">推定時給（円）</label>
+        <label for="self_appeal" class="form-label w-100">自己アピール</label>
+        <textarea id="self_appeal" name="self_appeal" class="form-control w-100 mt-1" rows="3">{{ old('self_appeal', $teacher->self_appeal ?? '') }}</textarea>
+        @error('self_appeal')<div class="text-danger small">{{ $message }}</div>@enderror
+    </div>
+    <div class="mb-3 text-start">
+        <label for="estimated_hourly_rate" class="form-label w-100">希望時給（円）</label>
         <input id="estimated_hourly_rate" type="number" name="estimated_hourly_rate" class="form-control w-100 mt-1" value="{{ old('estimated_hourly_rate', $teacher->estimated_hourly_rate ?? '') }}" min="0">
         @error('estimated_hourly_rate')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>

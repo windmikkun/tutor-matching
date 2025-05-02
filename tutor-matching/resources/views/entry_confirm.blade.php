@@ -6,7 +6,8 @@
         <div class="card-body p-5 text-center">
             <h3 class="mb-4">{{ $job->first_name ?? $job->name ?? 'この塾' }}に応募しますか？</h3>
             <div class="text-start mb-4" style="font-size:0.97rem;">
-                <div class="mb-1"><strong>住所:</strong> {{ $job->address ?? '未設定' }}</div>
+                <div class="mb-1"><strong>都道府県:</strong> {{ optional($job->user)->prefecture ?? '未設定' }}</div>
+                <div class="mb-1"><strong>県庁所在地:</strong> {{ optional($job->user)->address1 ?? '未設定' }}</div>
                 <div class="mb-1"><strong>募集科目:</strong> {{ $job->recruiting_subject ?? '未設定' }}</div>
                 <div class="mb-1"><strong>説明:</strong> {{ $job->description ?? '未設定' }}</div>
             </div>

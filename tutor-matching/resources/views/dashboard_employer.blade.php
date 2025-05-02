@@ -196,12 +196,16 @@
     <div class="dashboard-section-title">応募者一覧</div>
     @if(isset($entries) && count($entries) > 0)
       @foreach($entries as $entry)
-        <a href="{{ route('teacher.show', $entry->user->id) }}" class="dashboard-list-card dashboard-list-card-link">
-          <span class="list-title">
-            {{ $entry->user->teacher ? ($entry->user->teacher->last_name ?? '') . ' ' . ($entry->user->teacher->first_name ?? '') : ($entry->user->last_name ?? '') . ' ' . ($entry->user->first_name ?? '') }}
-          </span>
-          <span class="list-btn"><i class="bi bi-play-fill"></i></span>
-        </a>
+        @if($entry->user && $entry->user->teacher)
+          <a href="{{ route('teacher.show', $entry->user->teacher->id) }}" class="dashboard-list-card dashboard-list-card-link">
+            <span class="list-title">
+              {{ ($entry->user->teacher->last_name ?? '') . ' ' . ($entry->user->teacher->first_name ?? '') }}
+            </span>
+            <span class="list-btn"><i class="bi bi-play-fill"></i></span>
+          </a>
+        @else
+          <span class="dashboard-list-card dashboard-list-card-link text-muted">講師情報がありません</span>
+        @endif
       @endforeach
     @else
       <div class="text-muted">現在応募してきた講師はいません</div>

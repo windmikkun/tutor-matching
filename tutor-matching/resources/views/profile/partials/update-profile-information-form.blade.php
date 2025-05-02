@@ -18,7 +18,7 @@
     @endphp
     <form method="post" action="{{ route('teacher.account.update') }}" class="mt-6 space-y-6">
         @csrf
-        @method('patch')
+        @method('PUT')
 
         <div>
             <x-input-label for="name" :value="'氏名'" />

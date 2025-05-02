@@ -12,9 +12,11 @@
                             $cardImageUrl = Storage::url($image);
                         } elseif (isset($image) && is_string($image) && str_contains($image, 'storage/')) {
                             $cardImageUrl = $image;
+                        } else {
+                            $cardImageUrl = '/images/default.png';
                         }
                     @endphp
-                    <img src="{{ $cardImageUrl ?? $image ?? asset('images/default.png') }}" alt="画像" style="width:80px; height:80px; object-fit:cover; border-radius:50%; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+                    <img src="{{ $cardImageUrl }}" alt="画像" style="width:80px; height:80px; object-fit:cover; border-radius:50%; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
                     @if (isset($bookmarkButton))
                         <div class="card-bookmark-slot">
                             {!! $bookmarkButton !!}
@@ -86,6 +88,30 @@
                 font-size: 1.1rem;
                 transition: background 0.15s, color 0.15s;
                 display: inline-block;
+            }
+            .btn-gray-box {
+                background: #adb5bd;
+                color: #fff !important;
+                font-weight: 600;
+                border: none;
+                border-radius: 0.7em;
+                min-width: 110px;
+                padding: 10px 0;
+                box-shadow: 0 2px 6px rgba(160,160,160,0.08);
+                font-size: 1.1rem;
+                transition: background 0.15s, color 0.15s;
+                display: inline-block;
+                text-decoration: none;
+                cursor: pointer;
+            }
+            .btn-gray-box:hover, .btn-gray-box:focus {
+                background: #868e96;
+                color: #fff !important;
+                text-decoration: none;
+            }
+            @media (max-width: 600px) {
+                .btn-gray-box { min-width: 90px; font-size: 0.95rem; }
+            
                 text-decoration: none;
             }
             .btn-blue-box:hover, .btn-blue-box:focus {
@@ -98,22 +124,17 @@
             }
         </style>
         @foreach($buttons as $btn)
-            @if(isset($btn['disabled']) && $btn['disabled'])
-                <span class="btn-blue-box mx-2" style="background:#adb5bd; border-color:#adb5bd; color:#fff; cursor:not-allowed; pointer-events:none; opacity:0.85;">応募済</span>
-            @elseif($btn['label'] === '応募する' && isset($btn['job_id']))
-                <a href="{{ route('entry.create', ['id' => $btn['job_id']]) }}" class="btn-blue-box mx-2">{{ $btn['label'] }}</a>
-            @elseif(isset($btn['accept']) && $btn['accept'])
+            @if(isset($btn['custom']) && $btn['custom'] && isset($btn['html']))
+                {!! $btn['html'] !!}
+            @elseif(isset($btn['disabled']) && $btn['disabled'])
+                <span class="btn-blue-box mx-2" style="background:#adb5bd; border-color:#adb5bd; color:#fff; cursor:not-allowed; pointer-events:none; opacity:0.85;">{{ $btn['label'] }}</span>
+            @elseif(isset($btn['form']) && $btn['form'] && isset($btn['url']))
                 <form method="POST" action="{{ $btn['url'] }}" style="display:inline;">
                     @csrf
-                    <button type="submit" class="btn-blue-box mx-2">{{ $btn['label'] }}</button>
+                    <button type="submit" class="{{ $btn['class'] ?? 'btn-blue-box mx-2' }}" {!! isset($btn['onclick']) ? 'onclick="'.$btn['onclick'].'"' : '' !!}>{{ $btn['label'] }}</button>
                 </form>
-            @elseif(strpos($btn['url'], route('scout.reject', ['id' => 0])) !== false)
-                <form method="POST" action="{{ $btn['url'] }}" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="btn-blue-box mx-2">{{ $btn['label'] }}</button>
-                </form>
-            @else
-                <a href="{{ $btn['url'] }}" class="btn-blue-box mx-2">{{ $btn['label'] }}</a>
+            @elseif(isset($btn['url']))
+                <a href="{{ $btn['url'] }}" class="{{ $btn['class'] ?? 'btn-blue-box mx-2' }}" {!! isset($btn['onclick']) ? 'onclick="'.$btn['onclick'].'"' : '' !!}>{{ $btn['label'] }}</a>
             @endif
         @endforeach
     </div>

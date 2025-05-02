@@ -58,6 +58,8 @@ return [
     | User Avatar
     |-------------------------------------
     */
+    'messages_table' => 'ch_messages',
+
     'user_avatar' => [
         'folder' => 'users-avatar',
         'default' => 'avatar.png',

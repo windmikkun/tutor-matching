@@ -37,23 +37,54 @@ class DashboardController extends Controller
         }
         $teacher = $user->teacher;
         // 実データ: スカウト状況
+        // 1. スカウト総数（すべてのスカウト）
+        $scoutTotal = $teacher ? $teacher->scoutRequests()->count() : 0;
+        // 2. 未対応スカウト（new/pending かつ講師から返信がないもの）
+        $unrespondedScoutCount = 0;
+        if ($teacher) {
+            $scouts = $teacher->scoutRequests()->whereIn('status', ['new', 'pending'])->get();
+            foreach ($scouts as $scout) {
+                // チャットで講師が雇用者に返信したか確認
+                $teacherUserId = $teacher->user_id;
+                $employerUserId = $scout->employer ? $scout->employer->user_id : null;
+                if (!$employerUserId) {
+                    $unrespondedScoutCount++;
+                    continue;
+                }
+                $teacherReply = \App\Models\ChMessage::where('from_id', $teacherUserId)
+                    ->where('to_id', $employerUserId)
+                    ->where('created_at', '>', $scout->created_at)
+                    ->exists();
+                if (!$teacherReply) {
+                    $unrespondedScoutCount++;
+                }
+            }
+        }
+        // 既存のカウントも保持
         $scoutCounts = [
-            'new' => $teacher ? $teacher->scoutRequests()->where('status', 'new')->count() : 0,
-            'pending' => $teacher ? $teacher->scoutRequests()->where('status', 'pending')->count() : 0,
+            'unresponded' => $unrespondedScoutCount,
+            'total' => $scoutTotal,
             'matched' => $teacher ? $teacher->scoutRequests()->where('status', 'matched')->count() : 0,
         ];
         $scouts = [];
         if ($teacher) {
-            $scouts = $teacher->scoutRequests()->with(['employer'])->orderByDesc('created_at')->take(5)->get()->map(function($scout) {
-                return (object) [
-                    'id' => $scout->id,
-                    'employer_id' => $scout->employer_id,
-                    'employer_name' => $scout->employer
-    ? trim(($scout->employer->last_name ?? '') . ' ' . ($scout->employer->first_name ?? ''))
-    : '塾',
-                    'status' => $scout->status,
-                ];
-            });
+            // 重複（employer_id単位）を除き最新のみ取得
+            $scouts = $teacher->scoutRequests()
+                ->with(['employer'])
+                ->orderByDesc('created_at')
+                ->get()
+                ->unique('employer_id')
+                ->take(5)
+                ->map(function($scout) {
+                    return (object) [
+                        'id' => $scout->id,
+                        'employer_id' => $scout->employer_id,
+                        'employer_name' => $scout->employer
+                            ? trim(($scout->employer->last_name ?? '') . ' ' . ($scout->employer->first_name ?? ''))
+                            : '塾',
+                        'status' => $scout->status,
+                    ];
+                });
         }
         // 最新のチャット（部屋単位で最新1件ずつ、最大5名分）
         $userId = $user->id;

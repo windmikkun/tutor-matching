@@ -15,13 +15,25 @@ use Intervention\Image\ImageManager;
 class ProfileController extends Controller
 {
     /**
+     * 会員情報編集フォームの確認画面
+     */
+    public function confirm(Request $request)
+    {
+        $inputs = $request->all();
+        return view('employer.account_confirm', ['inputs' => $inputs]);
+    }
+    /**
      * Display the user's profile form.
      */
     public function edit(Request $request): View
     {
-        // teacher.account.editルートの場合は専用bladeを返す
-        if (request()->route()->getName() === 'teacher.account.edit') {
+        $routeName = request()->route()->getName();
+        if ($routeName === 'teacher.account.edit') {
             return view('teacher.account_edit', [
+                'user' => $request->user(),
+            ]);
+        } elseif ($routeName === 'employer.account.edit') {
+            return view('employer.account_edit', [
                 'user' => $request->user(),
             ]);
         }
@@ -34,17 +46,68 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $routeName = $request->route()->getName();
+        if ($routeName !== 'teacher.account.update' && $routeName !== 'employer.account.update') {
+            // 不正なアクセスやAPI経由の場合は何もせずリダイレクト
+            return redirect()->back();
         }
+        if ($routeName === 'employer.account.update') {
+            // usersテーブル用
+            $userValidated = $request->validate([
+                'email' => 'required|email|max:255',
+                'first_name' => 'nullable|string|max:255',
+                'last_name' => 'nullable|string|max:255',
+                'phone' => 'nullable|string|max:32',
+                'postal_code' => 'nullable|string|max:16',
+                'address1' => 'nullable|string|max:255',
+                'address2' => 'nullable|string|max:255',
+            ]);
+            $user = $request->user();
+            $user->fill($userValidated);
+            // 追加: 確認画面のhiddenフィールドから都道府県・市区町村を保存
+            // hiddenフィールドが存在すれば必ず保存
+            $user->prefecture = $request->input('prefecture', $user->prefecture);
+            $user->address1 = $request->input('address1', $user->address1);
+            $user->save();
 
-        $request->user()->save();
-
-        return Redirect::route('teacher.account.edit')->with('status', 'profile-updated');
+            // employersテーブル用
+            $employerValidated = $request->validate([
+                'contact_person' => 'nullable|string|max:255',
+                'address' => 'nullable|string|max:255',
+                'nearest_station' => 'nullable|string|max:255',
+                'recruiting_subject' => 'nullable|string|max:255',
+                'description' => 'nullable|string|max:1000',
+                'lesson_type' => 'nullable|string|max:32',
+                'student_count' => 'nullable|integer|min:0',
+                'student_demographics' => 'nullable|string|max:255',
+                'hourly_rate' => 'nullable|integer|min:0',
+                'profile_image' => 'nullable|string|max:255', // ファイルアップロードの場合は別途処理
+                'env_img' => 'nullable|string|max:1000', // JSON等で複数画像を管理している場合
+            ]);
+            $employer = \App\Models\Employer::where('user_id', $user->id)->first();
+            if ($employer) {
+                $employer->fill($employerValidated);
+                $employer->save();
+            }
+            return Redirect::route('dashboard.employer')->with('status', 'profile-updated');
+        } else {
+            // teacher用
+            $userValidated = $request->validate([
+                'email' => 'required|email|max:255',
+                'phone' => 'nullable|string|max:32',
+                'postal_code' => 'nullable|string|max:16',
+                'prefecture' => 'nullable|string|max:255',
+                'address1' => 'nullable|string|max:255',
+            ]);
+            $request->user()->fill($userValidated);
+            if ($request->user()->isDirty('email')) {
+                $request->user()->email_verified_at = null;
+            }
+            $request->user()->save();
+            return Redirect::route('dashboard.teacher')->with('status', 'profile-updated');
+        }
     }
 
     /**

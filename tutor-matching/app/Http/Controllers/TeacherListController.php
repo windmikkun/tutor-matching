@@ -9,9 +9,14 @@ use App\Models\Teacher;
 
 class TeacherListController extends Controller
 {
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        $teachers = Teacher::with('user')->get();
+        $user = auth()->user();
+        if (!$user || !in_array($user->user_type, ['employer', 'corporate_employer'])) {
+            abort(403);
+        }
+        // 全講師を取得
+        $teachers = \App\Models\Teacher::with('user')->orderBy('updated_at', 'desc')->get();
         return view('teacher_list', compact('teachers'));
     }
 
@@ -26,12 +31,12 @@ class TeacherListController extends Controller
         ]);
         // ログインユーザーがこの講師をブックマーク済みか判定
         $isBookmarked = false;
+        $currentUserBookmarks = collect();
         if (auth()->check()) {
-            $isBookmarked = \App\Models\Bookmark::where('user_id', auth()->id())
-                ->where('bookmarkable_type', 'teacher') // morphMapで小文字化
-                ->where('bookmarkable_id', $teacher->id)
-                ->exists();
+            $user = auth()->user();
+            $currentUserBookmarks = $user->bookmarks->where('bookmarkable_type', 'teacher');
+            $isBookmarked = $currentUserBookmarks->where('bookmarkable_id', $teacher->id)->isNotEmpty();
         }
-        return view('teacher_show', compact('teacher', 'bookmarkCount', 'isBookmarked'));
+        return view('teacher_show', compact('teacher', 'bookmarkCount', 'isBookmarked', 'currentUserBookmarks'));
     }
 }

@@ -15,9 +15,7 @@ class EmployerFactory extends Factory
             'first_name' => $this->faker->company(),
             'last_name' => '',
             'contact_person' => $this->faker->name(),
-            'phone' => $this->faker->phoneNumber(),
-            'address' => $this->faker->address(),
-            'description' => $this->faker->realText(80),
+                        'description' => $this->faker->realText(80),
             // user_idはテストごとに指定することを想定
         ];
     }

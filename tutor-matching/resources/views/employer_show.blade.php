@@ -1,22 +1,46 @@
 @extends('layouts.app')
+@section('page_title', '塾詳細')
 @section('content')
-    <div class="container mt-4">
-        <h1>{{ $employer->name ?? '塾詳細' }}</h1>
-        <p><strong>住所:</strong> {{ $employer->address ?? '-' }}</p>
-        <p><strong>電話番号:</strong> {{ $employer->phone ?? '-' }}</p>
-        <p><strong>担当者:</strong> {{ $employer->contact_person ?? '-' }}</p>
-        <p><strong>説明:</strong> {{ $employer->description ?? '-' }}</p>
-        <!-- 必要に応じて他の項目も追加 -->
-        <div class="mt-3">
-            <x-bookmark_button 
-                :isBookmarked="isset($isBookmarked) ? $isBookmarked : false" 
-                type="employer" 
-                :id="$employer->id" 
-            />
-            <span id="bookmark-count" class="ms-2" style="font-size: 1.2em; color: #ffc107; vertical-align: middle;">
-                ★ {{ $bookmarkCount }}
-            </span>
-            {{-- ↑ ブックマーク数を動的に更新するためのID付き --}}
-        </div>
-    </div>
+<div class="container" style="max-width:700px; margin:32px auto;">
+  @php
+    $envImgs = ($employer->env_img && is_string($employer->env_img)) ? json_decode($employer->env_img, true) : [];
+  @endphp
+  @php
+    // ログインユーザーのこのemployerへのブックマークIDを必ず取得
+    $bookmarkId = null;
+    if (!isset($currentUserBookmarks) && auth()->check()) {
+        $currentUserBookmarks = auth()->user()->bookmarks->where('bookmarkable_type', 'employer');
+    }
+    if (isset($currentUserBookmarks)) {
+        $bookmark = $currentUserBookmarks->where('bookmarkable_id', $employer->id)->first();
+        if ($bookmark) {
+            $bookmarkId = $bookmark->id;
+        }
+    }
+  @endphp
+  @include('components.list_card', [
+        'fields' => [
+          ['label' => '塾名', 'value' => $employer->name ?? '塾名未設定'],
+          ['label' => '担当者', 'value' => $employer->contact_person ?? '-'],
+          ['label' => '説明', 'value' => $employer->description ?? '-'],
+          ['label' => '住所', 'value' => $employer->address ?? '-'],
+          ['label' => '電話番号', 'value' => $employer->phone ?? '-'],
+        ],
+        'image' => ($employer->profile_image ?? null) ? $employer->profile_image : (($employer->env_img && count($envImgs) > 0) ? $envImgs[0] : asset('images/default_company.png')),
+        'buttons' => [
+          ['label' => 'ダッシュボードへ', 'url' => route('dashboard.teacher')],
+          ['label' => 'チャット画面へ', 'url' => route('chat.show', ['id' => $employer->user_id])],
+        ],
+        'bookmarkButton' => view('components.bookmark_button', [
+            'isBookmarked' => $isBookmarked ?? false,
+            'type' => 'employer',
+            'id' => $employer->id,
+            'count' => $bookmarkCount ?? 0,
+            'bookmarkId' => $bookmarkId,
+            'currentUserBookmarks' => $currentUserBookmarks ?? null
+        ])->render(),
+        'env_imgs' => $envImgs
+      ])
+</div>
+<script src="/js/bookmark.js"></script>
 @endsection

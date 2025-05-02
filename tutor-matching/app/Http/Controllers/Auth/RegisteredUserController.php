@@ -31,11 +31,12 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'first_name' => ['required', 'string', 'max:50'],
-            'last_name' => ['required', 'string', 'max:50'],
+            'first_name' => ['required', 'string', 'max:50'], // 担当者名
+            'last_name' => ['required', 'string', 'max:50'], // 会社名・事業所名
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'user_type' => ['nullable', 'in:teacher,employer'],
+
         ]);
 
         $user = User::create([
@@ -64,9 +65,9 @@ class RegisteredUserController extends Controller
         Auth::login($user);
         // ユーザー種別でダッシュボードにリダイレクト
         if ($user->user_type === 'employer') {
-            return redirect()->route('dashboard.employer');
+            return redirect('/teachers');
         } elseif ($user->user_type === 'teacher') {
-            return redirect()->route('dashboard.teacher');
+            return redirect('/jobs');
         }
         return redirect(RouteServiceProvider::HOME);
     }

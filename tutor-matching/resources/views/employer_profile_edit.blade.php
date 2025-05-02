@@ -13,6 +13,13 @@
       @enderror
     </div>
     <div class="mb-3">
+      <label class="form-label">担当者名</label>
+      <input type="text" class="form-control" name="last_name" value="{{ old('last_name', $user->last_name) }}">
+      @error('last_name')
+        <div class="text-danger small">{{ $message }}</div>
+      @enderror
+    </div>
+    <div class="mb-3">
       <label class="form-label">メールアドレス</label>
       <input type="email" class="form-control" name="email" value="{{ old('email', $user->email) }}">
     </div>

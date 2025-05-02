@@ -66,12 +66,12 @@
 
 
                 <div class="custom-form-group">
-  <label for="last_name" class="custom-form-label">姓</label>
-  <input type="text" class="custom-form-input" id="last_name" name="last_name" required autofocus placeholder="例）山田">
+  <label for="last_name" class="custom-form-label">会社名・事業所名</label>
+  <input type="text" class="custom-form-input" id="last_name" name="last_name" required autofocus placeholder="例）株式会社サンプル">
 </div>
 <div class="custom-form-group">
-  <label for="first_name" class="custom-form-label">名</label>
-  <input type="text" class="custom-form-input" id="first_name" name="first_name" required placeholder="例）太郎">
+  <label for="first_name" class="custom-form-label">担当者名</label>
+  <input type="text" class="custom-form-input" id="first_name" name="first_name" required placeholder="例）山田太郎">
 </div>
                 <div class="custom-form-group">
   <label for="email" class="custom-form-label">メールアドレス</label>
@@ -85,6 +85,8 @@
   <label for="password_confirmation" class="custom-form-label">パスワード（確認用）</label>
   <input type="password" class="custom-form-input" id="password_confirmation" name="password_confirmation" required placeholder="もう一度入力">
 </div>
+
+
                 <button type="submit" class="custom-submit-btn">登録</button>
     </div>
             </form>

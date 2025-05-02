@@ -20,8 +20,8 @@
                 </div>
 
                 <!-- Central Page Title -->
-                <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center" style="min-width:120px;">
-                    <span class="text-lg font-semibold text-gray-700" style="letter-spacing:0.03em;">@yield('page_title')</span>
+                <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); min-width:120px; text-align:center; z-index:9999; pointer-events:none;">
+                    <span style="font-size:1.1rem; font-weight:bold; color:#444; letter-spacing:0.03em;">@yield('page_title')</span>
                 </div>
 
 

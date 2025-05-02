@@ -8,7 +8,7 @@ return new class extends Migration {
     {
         Schema::table('employers', function (Blueprint $table) {
             if (!Schema::hasColumn('employers', 'recruiting_subject')) {
-                $table->string('recruiting_subject', 100)->nullable()->after('address');
+                $table->string('recruiting_subject', 100)->nullable();
             }
         });
     }

@@ -84,7 +84,17 @@
                 {{-- header buttons --}}
                 <nav class="m-header-right">
                     <a href="#" class="add-to-favorite"><i class="fas fa-star"></i></a>
-                    <a href="/"><i class="fas fa-home"></i></a>
+                    @php
+    $homeUrl = '/';
+    if (isset(Auth::user()->user_type)) {
+        if (Auth::user()->user_type === 'teacher') {
+            $homeUrl = '/jobs';
+        } elseif (Auth::user()->user_type === 'employer') {
+            $homeUrl = '/teachers';
+        }
+    }
+@endphp
+<a href="{{ $homeUrl }}"><i class="fas fa-home"></i></a>
                 </nav>
             </nav>
             {{-- Internet connection --}}

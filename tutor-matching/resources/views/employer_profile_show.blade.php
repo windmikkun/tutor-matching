@@ -12,11 +12,41 @@
       @if(!empty($employer->phone))
         <p class="card-text mb-1"><strong>電話番号:</strong> {{ $employer->phone }}</p>
       @endif
+      @if(!empty($employer->postal_code))
+        <p class="card-text mb-1"><strong>郵便番号:</strong> {{ $employer->postal_code }}</p>
+        @php
+          $prefecture = null;
+          $address1 = null;
+          try {
+            $response = Illuminate\Support\Facades\Http::get('https://jp-postal-code-api.bel4.com/api/v1/zip-code', [
+              'code' => $employer->postal_code
+            ]);
+            if ($response->ok() && isset($response->json()['data']['prefecture']) && isset($response->json()['data']['city'])) {
+              $prefecture = $response->json()['data']['prefecture'];
+              $address1 = $response->json()['data']['city'];
+            }
+          } catch (Exception $e) {}
+        @endphp
+        <p class="card-text mb-1"><strong>都道府県:</strong> {{ $user->address1 ?? '未設定' }}</p>
+        <p class="card-text mb-1"><strong>市区町村:</strong> {{ $user->address2 ?? '未設定' }}</p>
+      @endif
       @if(!empty($employer->address))
         <p class="card-text mb-1"><strong>住所:</strong> {{ $employer->address }}</p>
       @endif
       @if(!empty($employer->description))
         <p class="card-text mb-1"><strong>説明:</strong> {{ $employer->description }}</p>
+      @endif
+      @if(!empty($employer->lesson_type))
+        <p class="card-text mb-1"><strong>指導形態:</strong> {{ $employer->lesson_type }}</p>
+      @endif
+      @if(!empty($employer->student_count))
+        <p class="card-text mb-1"><strong>生徒数:</strong> {{ $employer->student_count }}</p>
+      @endif
+      @if(!empty($employer->student_demographics))
+        <p class="card-text mb-1"><strong>生徒層:</strong> {{ $employer->student_demographics }}</p>
+      @endif
+      @if(isset($employer->hourly_rate))
+        <p class="card-text mb-1"><strong>時給:</strong> {{ number_format($employer->hourly_rate) }}円</p>
       @endif
       @php
         use Illuminate\Support\Facades\Storage;

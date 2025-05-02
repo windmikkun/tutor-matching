@@ -144,27 +144,31 @@
       <li><a href="{{ route('teacher.profile.edit') }}" class="dashboard-menu-link">プロフィール編集</a></li>
       <li><a href="{{ route('teacher.account.edit') }}" class="dashboard-menu-link">会員情報編集</a></li>
       <li><a href="{{ route('chat') }}" class="dashboard-menu-link">チャット画面</a></li>
-      <li><a href="{{ url('/scouts') }}" class="dashboard-menu-link">スカウト一覧</a></li>
+
       <li><a href="{{ url('/entries') }}" class="dashboard-menu-link">応募済一覧</a></li>
       <li><a href="{{ url('/bookmarks') }}" class="dashboard-menu-link">ブックマーク一覧</a></li>
     </ul>
   </div>
-  <div class="dashboard-double-box">
-    <div class="dashboard-section-title text-center" style="font-size:1.4rem; font-weight:bold;">スカウト状況</div>
-    <div class="dashboard-status-divider"></div>
-    <div style="display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center;">
-      <div style="display:flex; align-items:center; gap:8px; font-size:1.1rem;">
-        <span style="min-width:64px; text-align:center;">未対応</span>
-        <span style="font-weight:bold; font-size:1.3rem; min-width:32px; text-align:center;">
-            {{ ($scoutCounts['new'] ?? 0) + ($scoutCounts['pending'] ?? 0) }}
-        </span>
-        <span style="min-width:24px; text-align:center;">件</span>
-    </div>
-    <div style="display:flex; align-items:center; gap:8px; font-size:1.1rem;">
-        <span style="min-width:48px; text-align:center;">成立</span>
-        <span style="font-weight:bold; font-size:1.3rem; min-width:32px; text-align:center;">{{ $scoutCounts['matched'] ?? 0 }}</span>
-        <span style="min-width:24px; text-align:center;">件</span>
-    </div>
+  <div class="dashboard-double-box" style="height:100%; min-height:260px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+    <div style="flex:1; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <div class="dashboard-section-title text-center" style="font-size:1.4rem; font-weight:bold; margin-bottom:18px;">スカウト状況</div>
+      <div class="dashboard-status-divider" style="margin-bottom:18px;"></div>
+      <div style="display:flex; flex-direction:column; gap:32px; align-items:center; justify-content:center; width:100%;">
+         <div style="display:flex; align-items:center; gap:14px; font-size:1.15rem;">
+           <span style="min-width:64px; text-align:center;">未対応</span>
+           <span style="font-weight:bold; font-size:1.6rem; min-width:36px; text-align:center;">
+               {{ $scoutCounts['unresponded'] ?? 0 }}
+           </span>
+           <span style="min-width:24px; text-align:center;">件</span>
+         </div>
+         <div style="display:flex; align-items:center; gap:14px; font-size:1.15rem;">
+           <span style="min-width:64px; text-align:center;">スカウト総数</span>
+           <span style="font-weight:bold; font-size:1.6rem; min-width:36px; text-align:center;">
+               {{ $scoutCounts['total'] ?? 0 }}
+           </span>
+           <span style="min-width:24px; text-align:center;">件</span>
+         </div>
+      </div>
     </div>
   </div>
 </div>

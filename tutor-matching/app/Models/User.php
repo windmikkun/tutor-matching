@@ -28,7 +28,7 @@ class User extends Authenticatable
         return $this->user_type === 'teacher';
     }
     public function isEmployer() {
-        return $this->user_type === 'employer';
+        return in_array($this->user_type, ['employer', 'corporate_employer']);
     }
 
 
@@ -47,6 +47,8 @@ class User extends Authenticatable
         'user_type',
         'phone',
         'postal_code',
+        'prefecture', // 追加
+        'address1',   // 追加
     ];
 
     /**

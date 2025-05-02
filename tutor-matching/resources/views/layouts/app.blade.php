@@ -16,8 +16,40 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased">
+    <style>
+.toast-notification {
+  position: fixed;
+  top: 32px;
+  right: 32px;
+  z-index: 9999;
+  background: #3490dc;
+  color: #fff;
+  padding: 16px 32px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.toast-notification.show {
+  opacity: 1;
+}
+</style>
+</head>
+    <body>
+
+@if (session('status') === 'profile-updated')
+  <div id="toast" class="toast-notification">保存が完了しました</div>
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      var toast = document.getElementById('toast');
+      if (toast) {
+        setTimeout(function() { toast.classList.add('show'); }, 100);
+        setTimeout(function() { toast.classList.remove('show'); }, 3200);
+      }
+    });
+  </script>
+@endif
         <div class="min-h-screen bg-gray-100">
             <header class="bg-white shadow" style="position:fixed; top:0; left:0; width:100vw; z-index:2100;">
                 @include('layouts.navigation')

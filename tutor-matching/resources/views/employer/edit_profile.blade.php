@@ -7,6 +7,27 @@
                 <h2 class="fw-bold mb-0" style="font-size:2rem;">雇用者プロフィール編集</h2>
             </div>
             <div class="custom-form-center">
+@if (session('status') === 'profile-updated')
+  <div id="toast" class="toast-notification">保存が完了しました</div>
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      var toast = document.getElementById('toast');
+      if (toast) {
+        setTimeout(function() { toast.classList.add('show'); }, 100);
+        setTimeout(function() { toast.classList.remove('show'); }, 3200);
+      }
+    });
+  </script>
+@endif
+@if ($errors->any())
+  <div class="alert alert-danger">
+    <ul class="mb-0">
+      @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+      @endforeach
+    </ul>
+  </div>
+@endif
 <form method="POST" action="{{ route('employer.profile.update') }}" enctype="multipart/form-data">
     @csrf
     @method('PUT')
@@ -72,14 +93,6 @@
       <input type="text" class="custom-form-input" id="contact_person" name="contact_person" value="{{ old('contact_person', $employer->contact_person ?? '') }}">
     </div>
     <div class="custom-form-group">
-      <label for="phone" class="custom-form-label">電話番号</label>
-      <input type="tel" class="custom-form-input" id="phone" name="phone" value="{{ old('phone', $employer->phone ?? '') }}">
-    </div>
-    <div class="custom-form-group">
-      <label for="address" class="custom-form-label">住所</label>
-      <input type="text" class="custom-form-input" id="address" name="address" value="{{ old('address', $employer->address ?? '') }}">
-    </div>
-    <div class="custom-form-group">
       <label for="description" class="custom-form-label">事業内容・説明</label>
       <textarea class="custom-form-input" id="description" name="description" rows="3">{{ old('description', $employer->description ?? '') }}</textarea>
     </div>
@@ -110,8 +123,18 @@
       <input type="number" class="custom-form-input" id="student_count" name="student_count" value="{{ old('student_count', $employer->student_count ?? '') }}" min="0">
     </div>
     <div class="custom-form-group">
-      <label for="student_demographics" class="custom-form-label">生徒層</label>
-      <input type="text" class="custom-form-input" id="student_demographics" name="student_demographics" value="{{ old('student_demographics', $employer->student_demographics ?? '') }}">
+      <label class="custom-form-label">生徒層</label>
+      <input type="text" class="custom-form-input" name="student_demographics" value="{{ old('student_demographics', $employer->student_demographics ?? '') }}">
+      @error('student_demographics')
+        <div class="text-danger small">{{ $message }}</div>
+      @enderror
+    </div>
+    <div class="custom-form-group">
+      <label class="custom-form-label">募集科目</label>
+      <input type="text" class="custom-form-input" name="recruiting_subject" value="{{ old('recruiting_subject', $employer->recruiting_subject ?? '') }}">
+      @error('recruiting_subject')
+        <div class="text-danger small">{{ $message }}</div>
+      @enderror
     </div>
     <div class="custom-form-group">
       <label for="hourly_rate" class="custom-form-label">時給（円）</label>

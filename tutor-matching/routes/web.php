@@ -3,7 +3,9 @@
 use Illuminate\Support\Facades\Route;
 
 // プロフィール画像アップロードAPI
-Route::post('/profile/image/upload', [\App\Http\Controllers\ProfileController::class, 'uploadProfileImage'])->name('profile.image.upload');
+Route::post('/profile/image/upload', [\App\Http\Controllers\ProfileController::class, 'uploadProfileImage'])
+    ->middleware(['auth', 'verified'])
+    ->name('profile.image.upload');
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\API\BookmarkController; // ブックマークAPI用
@@ -36,8 +38,18 @@ Route::get('/list', function () {
 })->middleware(['auth']);
 
 Route::get('/', function () {
+    if (Auth::check()) {
+        $user = Auth::user();
+        if (method_exists($user, 'isEmployer') && $user->isEmployer()) {
+            return redirect('/teachers');
+        }
+    }
     return view('welcome');
 })->name('/');
+
+// 求人リストページ
+use App\Http\Controllers\JobListController;
+Route::get('/jobs', [JobListController::class, 'index'])->name('jobs');
 
 // 講師登録ページ
 Route::get('/register/teacher', function () {
@@ -118,6 +130,25 @@ Route::put('/teacher/profile', [TeacherProfileController::class, 'update'])->mid
 Route::get('/teacher/account', [ProfileController::class, 'edit'])->middleware(['auth', 'verified'])->name('teacher.account.edit');
 Route::put('/teacher/account', [ProfileController::class, 'update'])->middleware(['auth', 'verified'])->name('teacher.account.update');
 Route::delete('/teacher/account', [ProfileController::class, 'destroy'])->middleware(['auth', 'verified'])->name('teacher.account.destroy');
+Route::match(['get', 'post'], '/teacher/account/confirm', function(\Illuminate\Http\Request $request) {
+    if ($request->isMethod('post')) {
+        session(['inputs' => $request->all()]);
+        return redirect()->route('teacher.account.confirm');
+    }
+    $inputs = session('inputs', []);
+    return view('teacher.account_confirm', compact('inputs'));
+})->middleware(['auth', 'verified'])->name('teacher.account.confirm');
+
+// 講師プロフィール更新完了画面
+Route::get('/teacher/profile/update/complete', function () {
+    return view('teacher.profile_update_complete');
+})->middleware(['auth', 'verified'])->name('teacher.profile.update.complete');
+
+// 雇用者用 会員情報編集（メール・パスワード・電話番号等）
+Route::get('/employer/account', [ProfileController::class, 'edit'])->middleware(['auth', 'verified'])->name('employer.account.edit');
+Route::post('/employer/account', [ProfileController::class, 'confirm'])->middleware(['auth', 'verified'])->name('employer.account.confirm');
+Route::put('/employer/account', [ProfileController::class, 'update'])->middleware(['auth', 'verified'])->name('employer.account.update');
+Route::delete('/employer/account', [ProfileController::class, 'destroy'])->middleware(['auth', 'verified'])->name('employer.account.destroy');
 
 // 講師詳細ページ（ブックマーク数取得用）
 Route::get('/teacher/{id}', [\App\Http\Controllers\TeacherListController::class, 'show'])->name('teacher_show');
@@ -126,40 +157,8 @@ Route::middleware('auth')->group(function () {
     // ブックマーク登録・削除API
     Route::post('/bookmarks', [BookmarkController::class, 'store'])->name('bookmarks.store');
     Route::delete('/bookmarks/{bookmark}', [BookmarkController::class, 'destroy'])->name('bookmarks.destroy');
-    // ブックマーク一覧
-    Route::get('/bookmarks', function () {
-        $user = Auth::user();
-        $bookmarks = \App\Models\Bookmark::where('user_id', $user->id)->get();
-        $items = [];
-        foreach ($bookmarks as $bookmark) {
-            if ($bookmark->bookmarkable_type === 'Employer') {
-                $employer = \App\Models\Employer::find($bookmark->bookmarkable_id);
-                if ($employer) $items[] = $employer;
-            } elseif ($bookmark->bookmarkable_type === 'Teacher') {
-                $teacher = \App\Models\Teacher::find($bookmark->bookmarkable_id);
-                if ($teacher) $items[] = $teacher;
-            }
-        }
-        return view('bookmarks', ['bookmarks' => $items]);
-    });
-
-    // 求人リスト・講師リスト自動振り分け
-    Route::get('/jobs', function () {
-        $user = Auth::user();
-        if (!$user) {
-            return redirect('/login');
-        }
-        if (method_exists($user, 'isTeacher') && $user->isTeacher()) {
-            // 講師：塾リストを表示
-            $jobs = \App\Models\Employer::all();
-            return view('jobs', compact('jobs'));
-        } elseif (method_exists($user, 'isEmployer') && $user->isEmployer()) {
-            // 求人者：講師リストへリダイレクト
-            return redirect('/teachers');
-        } else {
-            return redirect('/')->with('error', 'このページにはアクセスできません');
-        }
-    });
+    // 講師ブックマーク一覧ページ（講師ユーザーは雇用者（求人）のみ表示）
+    Route::get('/bookmarks', [\App\Http\Controllers\API\BookmarkController::class, 'teacherBookmarks'])->name('bookmarks.list');
 
     // 求人詳細
     Route::get('/jobs/{id}', function($id) {
@@ -201,13 +200,17 @@ Route::middleware('auth')->group(function () {
     })->name('entry.store');
 
     // 応募済一覧
+
     Route::get('/entries/applicants', function() {
-        $entries = \App\Models\Entry::with('user.teacher')->orderByDesc('created_at')->get();
-        $teachers = $entries->map(function($entry) {
-            return $entry->user->teacher;
-        })->filter();
-        return view('teacher_list', ['teachers' => $teachers]);
-    });
+        $user = auth()->user();
+        if (!$user || !in_array($user->user_type, ['employer', 'corporate_employer'])) {
+            abort(403);
+        }
+        $employer = $user->employer; // employersテーブルのidを使う->employer;
+        $entries = \App\Models\Entry::with('user.teacher')->where('employer_id', $employer->id)->get();
+        return view('teacher_list', ['entries' => $entries]);
+    })->name('entries.applicants');
+
     Route::get('/entries', function() {
         return view('entries');
     })->name('entries.list');
@@ -227,6 +230,32 @@ Route::middleware('auth')->group(function () {
         // Chatifyのユーザー個別チャットページへリダイレクト
         return redirect('/chatify/' . $id);
     })->name('chat.show');
+    // 応募者拒否（employerが応募者をリストから削除）
+    Route::post('/applicant/{id}/reject', function($id) {
+        $user = Auth::user();
+        $employer = $user ? $user->employer : null;
+        \Log::info('[REJECT] incoming id: ' . $id);
+        \Log::info('[REJECT] employer: ', $employer ? $employer->toArray() : []);
+        if (!$employer || !in_array($user->user_type, ['employer', 'corporate_employer'])) {
+            \Log::warning('[REJECT] aborting: user not employer');
+            abort(403);
+        }
+        $entry = \App\Models\Entry::find($id);
+        \Log::info('[REJECT] found entry: ', $entry ? $entry->toArray() : []);
+        \Log::info('[REJECT DEBUG] employer_id (employer): ' . ($employer ? $employer->id : 'null'));
+        \Log::info('[REJECT DEBUG] employer_id (entry): ' . ($entry ? $entry->employer_id : 'null'));
+        $deleted = 0;
+        if ($entry && $entry->employer_id == $employer->id) {
+            $entry->delete();
+            $deleted = 1;
+            \Log::info('[REJECT] entry deleted');
+        } else {
+            \Log::warning('[REJECT] entry not deleted: entry missing or employer_id mismatch');
+        }
+        \Log::info('[REJECT] Entry deleted count: ' . $deleted);
+        return redirect()->route('entries.applicants')->with('success', '応募者を拒否しました（削除件数: ' . $deleted . '）');
+    })->name('applicant.reject');
+
     // 講師リスト
     Route::get('/teachers', [\App\Http\Controllers\TeacherListController::class, 'index'])->name('teacher.list');
     Route::get('/teachers/{id}', [\App\Http\Controllers\TeacherListController::class, 'show'])->name('teacher.show');

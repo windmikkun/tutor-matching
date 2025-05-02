@@ -11,6 +11,24 @@ class BookmarkController extends Controller
     /**
      * ブックマーク一覧取得（ログインユーザー分のみ）
      */
+    /**
+     * 講師ブックマーク一覧ページ用
+     */
+    public function teacherBookmarks(Request $request)
+    {
+        $user = $request->user();
+        // 講師ユーザーなら雇用者（求人）のみ取得
+        if ($user->user_type === 'teacher') {
+            $employerBookmarks = $user->bookmarks()->where('bookmarkable_type', 'employer')->get();
+            $employers = \App\Models\Employer::whereIn('id', $employerBookmarks->pluck('bookmarkable_id'))->get();
+            return view('bookmarks', ['employers' => $employers]);
+        }
+        // 雇用者ユーザーは講師のブックマーク
+        $teacherBookmarks = $user->bookmarks()->where('bookmarkable_type', 'teacher')->get();
+        $teachers = \App\Models\Teacher::whereIn('id', $teacherBookmarks->pluck('bookmarkable_id'))->get();
+        return view('bookmarks', ['teachers' => $teachers]);
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -57,10 +75,20 @@ class BookmarkController extends Controller
                 ->exists();
 
             if ($exists) {
+                // 既に存在する場合も「OK」として現在の状態・カウントを返す
+                if ($bookmarkable_type === 'employer') {
+                    $model = \App\Models\Employer::find($bookmarkable_id);
+                    $bookmarkCount = $model ? $model->bookmarkedByTeachers()->count() : 0;
+                } elseif ($bookmarkable_type === 'teacher') {
+                    $model = \App\Models\Teacher::find($bookmarkable_id);
+                    $bookmarkCount = $model ? $model->bookmarkedByEmployers()->count() : 0;
+                } else {
+                    $bookmarkCount = 0;
+                }
                 return response()->json([
-                    'message' => '既にブックマークしています',
-                    'error' => 'already_bookmarked',
-                ], 409);
+                    'bookmarked' => true,
+                    'bookmarkCount' => $bookmarkCount
+                ], 200);
             }
 
             // 登録
@@ -83,7 +111,8 @@ class BookmarkController extends Controller
 
             return response()->json([
                 'bookmarked' => true,
-                'bookmarkCount' => $bookmarkCount
+                'bookmarkCount' => $bookmarkCount,
+                'bookmarkId' => $bookmark->id
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
