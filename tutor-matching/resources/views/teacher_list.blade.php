@@ -21,7 +21,7 @@
         ['label' => '市区町村', 'value' => optional($teacher->user)->address1 ?? '未設定'],
         ['label' => '得意科目', 'value' => $teacher->subject],
         ['label' => '学年', 'value' => $teacher->grade_level],
-        ['label' => '自己紹介', 'value' => Str::limit($teacher->bio, 60)],
+        ['label' => '自己アピール', 'value' => Str::limit($teacher->self_appeal, 60)],
       ],
       'image' => $teacher->profile_image ?? asset('images/default.png'),
       'buttons' => [
@@ -54,7 +54,7 @@
         ['label' => '市区町村', 'value' => optional($teacher->user)->address1 ?? '未設定'],
         ['label' => '得意科目', 'value' => $teacher->subject],
         ['label' => '学年', 'value' => $teacher->grade_level],
-        ['label' => '自己紹介', 'value' => Str::limit($teacher->bio, 60)],
+        ['label' => '自己アピール', 'value' => Str::limit($teacher->self_appeal, 60)],
       ],
       'image' => $teacher->profile_image ?? asset('images/default.png'),
       'buttons' => [

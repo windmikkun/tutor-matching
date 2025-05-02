@@ -50,18 +50,21 @@ class BookmarkController extends Controller
             $user = $request->user();
             // ユーザー種別ごとにバリデーション
             if ($user->user_type === 'teacher') {
+                // teacherはemployerのみブックマーク可
                 $validated = $request->validate([
                     'employer_id' => 'required|exists:employers,id',
                 ]);
-                $bookmarkable_type = 'employer'; // 小文字に統一
+                $bookmarkable_type = 'employer';
                 $bookmarkable_id = $validated['employer_id'];
-            } elseif (in_array($user->user_type, ['individual_employer', 'corporate_employer'])) {
+            } elseif ($user->user_type === 'employer') {
+                // employerはteacherのみブックマーク可
                 $validated = $request->validate([
                     'teacher_id' => 'required|exists:teachers,id',
                 ]);
-                $bookmarkable_type = 'teacher'; // 小文字に統一
+                $bookmarkable_type = 'teacher';
                 $bookmarkable_id = $validated['teacher_id'];
             } else {
+                // それ以外は不可
                 return response()->json([
                     'message' => '不正なユーザー種別です',
                     'error' => 'forbidden',

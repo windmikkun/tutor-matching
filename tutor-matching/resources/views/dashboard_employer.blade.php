@@ -179,7 +179,7 @@
           <div style="display:flex; align-items:center; gap:8px; font-size:1.1rem;">
             <span style="min-width:64px; text-align:center;">未対応</span>
             <span style="font-weight:bold; font-size:1.3rem; min-width:32px; text-align:center;">
-                {{ ($scoutCounts['new'] ?? 0) + ($scoutCounts['pending'] ?? 0) }}
+                {{ isset($entries) ? count($entries) : 0 }}
             </span>
             <span style="min-width:24px; text-align:center;">件</span>
         </div>
@@ -221,7 +221,6 @@
           </span>
           <span class="list-btn"><i class="bi bi-play-fill"></i></span>
         </a>
-        </div>
       @endforeach
     @else
       <div class="text-muted">現在チャットはありません</div>

@@ -12,7 +12,7 @@
         @foreach($employers as $employer)
           @include('components.list_card', [
             'fields' => [
-              ['label' => '塾名', 'value' => $employer->name],
+              ['label' => '塾名', 'value' => $employer->first_name],
               ['label' => '担当者', 'value' => $employer->contact_person ?? '-'],
               ['label' => '説明', 'value' => $employer->description ?? '-'],
             ],
